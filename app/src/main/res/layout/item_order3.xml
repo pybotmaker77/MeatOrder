@@ -30,7 +30,7 @@
         android:text="X"
         android:textColor="#FF0000"
         style="?android:attr/buttonBarButtonStyle"
-        android:minWidth="0"
-        android:minHeight="0"
+        android:minWidth="24dp"
+        android:minHeight="24dp"
         android:padding="4dp" />
 </LinearLayout>
