@@ -1,0 +1,8 @@
+﻿<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="header_bg">#000000</color>
+    <color name="yellow_highlight">#FFF8E1</color>
+    <color name="yellow_border">#FBC02D</color>
+    <color name="green_check">#388E3C</color>
+</resources>
