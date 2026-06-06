@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
-    <include layout="@layout/header" android:id="@+id/header" />
+    <include layout="@layout/header" />
 
     <LinearLayout
         android:id="@+id/buttonsContainer"
@@ -15,7 +15,7 @@
         android:orientation="vertical"
         android:padding="10dp"
         android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@+id/header"
+        app:layout_constraintTop_toBottomOf="@id/header"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
