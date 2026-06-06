@@ -1,0 +1,16 @@
+﻿<androidx.appcompat.widget.Toolbar
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/header"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    app:layout_constraintHeightPercent="0.1"
+    android:background="@color/header_bg"
+    app:titleTextColor="@color/white"
+    app:title="Заказ мяса"
+    android:gravity="center"
+    app:contentInsetStart="0dp"
+    app:contentInsetEnd="0dp"
+    app:navigationIcon="@drawable/ic_arrow_back"
+    app:navigationIconTint="@color/white">
+</androidx.appcompat.widget.Toolbar>

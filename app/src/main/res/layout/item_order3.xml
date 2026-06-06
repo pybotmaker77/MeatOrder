@@ -1,0 +1,35 @@
+﻿<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/tvEntity"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        tools:text="Трахея" />
+    <TextView
+        android:id="@+id/tvQuantity"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        tools:text="3" />
+    <TextView
+        android:id="@+id/tvInputType"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        tools:text="блк." />
+    <Button
+        android:id="@+id/btnDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="X"
+        android:textColor="#FF0000"
+        style="?android:attr/buttonBarButtonStyle"
+        android:minWidth="0"
+        android:minHeight="0"
+        android:padding="4dp" />
+</LinearLayout>
