@@ -1,4 +1,4 @@
-﻿package com.example.meatorder.ui
+package com.example.meatorder.ui
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -12,7 +12,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
+import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentOrder4Binding
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
@@ -24,7 +24,6 @@ import kotlinx.coroutines.launch
 class Order4Fragment : Fragment() {
     private var _binding: FragmentOrder4Binding? = null
     private val binding get() = _binding!!
-    private val args: Order4FragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,9 +35,10 @@ class Order4Fragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.header.setNavigationOnClickListener { findNavController().popBackStack() }
+        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
+        header?.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        val json = args.finalItemsJson
+        val json = arguments?.getString("finalItemsJson") ?: return
         val type = object : TypeToken<List<Map<String, Any>>>() {}.type
         val items: List<Map<String, Any>> = Gson().fromJson(json, type)
 
@@ -83,14 +83,13 @@ class Order4Fragment : Fragment() {
             binding.btnCopy.setOnClickListener {
                 val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText("order", finalText))
-                with(binding.btnCopy) {
-                    text = "Скопировано ✓"
-                    setTextColor(Color.GREEN)
-                    postDelayed({
-                        text = "Копировать"
-                        setTextColor(Color.BLACK)
-                    }, 2000)
-                }
+                val btn = binding.btnCopy
+                btn.text = "Скопировано ✓"
+                btn.setTextColor(Color.GREEN)
+                btn.postDelayed({
+                    btn.text = "Копировать"
+                    btn.setTextColor(Color.BLACK)
+                }, 2000)
                 getPrefs().clearDraft()
             }
 
