@@ -47,7 +47,7 @@ class PreferencesHelper(context: Context) {
             "headerColor" to headerColor,
             "footerColor" to footerColor,
             "bodyColor" to bodyColor,
-            "bgImagePath" to (backgroundImagePath ?= "")
+            "bgImagePath" to (backgroundImagePath ?: "")
         )
         return Gson().toJson(map)
     }
