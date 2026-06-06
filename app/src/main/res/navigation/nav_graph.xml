@@ -1,7 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/mainFragment">
 
@@ -16,9 +15,6 @@
         <action
             android:id="@+id/action_mainFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
-        <action
-            android:id="@+id/action_mainFragment_to_order2Fragment"
-            app:destination="@id/order2Fragment" />
     </fragment>
 
     <fragment
@@ -58,10 +54,6 @@
         <argument
             android:name="templateIds"
             app:argType="integer[]" />
-        <argument
-            android:name="preSelectedIds"
-            app:argType="integer[]"
-            android:defaultValue="@null" />
         <action
             android:id="@+id/action_order2Fragment_to_order3Fragment"
             app:destination="@id/order3Fragment" />
