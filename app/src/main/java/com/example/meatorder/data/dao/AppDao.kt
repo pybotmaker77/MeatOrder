@@ -72,6 +72,6 @@ interface AppDao {
     @Update
     suspend fun updateInputType(inputType: InputType)
 
-    @Elete
+    @Delete
     suspend fun deleteInputType(inputType: InputType)
 }
