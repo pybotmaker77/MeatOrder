@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true   # разрешаем Node.js 20 для actions (пока не обновлены)
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     steps:
       - uses: actions/checkout@v4
 
@@ -17,14 +17,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Print environment info
-        run: |
-          java -version
-          chmod +x gradlew
-          ./gradlew --version
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      - name: Clean and Build APK with stacktrace
-        run: ./gradlew clean assembleDebug --stacktrace --no-daemon
+      - name: Build APK
+        run: ./gradlew assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
