@@ -1,4 +1,4 @@
-﻿package com.example.meatorder.ui
+package com.example.meatorder.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -37,11 +37,7 @@ class Order1Fragment : Fragment() {
         }
 
         binding.btnFromScratch.setOnClickListener {
-            val action = Order1FragmentDirections.actionOrder1FragmentToOrder2Fragment(
-                byBalance = false,
-                templateIds = intArrayOf()
-            )
-            findNavController().navigate(action)
+            findNavController().navigate(R.id.action_order1Fragment_to_order2Fragment)
         }
 
         binding.btnFromTemplate.setOnClickListener {
@@ -71,11 +67,7 @@ class Order1Fragment : Fragment() {
             .setPositiveButton("Выбрать") { _, _ ->
                 val selectedIds = templates.filterIndexed { index, _ -> checked[index] }
                     .map { it.id }.toIntArray()
-                val action = Order1FragmentDirections.actionOrder1FragmentToOrder2Fragment(
-                    byBalance = false,
-                    templateIds = selectedIds
-                )
-                findNavController().navigate(action)
+                findNavController().navigate(R.id.action_order1Fragment_to_order2Fragment)
             }
             .setNegativeButton("Отмена", null)
             .show()
