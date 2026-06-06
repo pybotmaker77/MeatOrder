@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.meatorder.ui.MainFragment"
+        android:label="Главная"
+        tools:layout="@layout/fragment_main">
+        <action
+            android:id="@+id/action_mainFragment_to_order1Fragment"
+            app:destination="@id/order1Fragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_order2Fragment"
+            app:destination="@id/order2Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/order1Fragment"
+        android:name="com.example.meatorder.ui.Order1Fragment"
+        android:label="Заказ1"
+        tools:layout="@layout/fragment_order1">
+        <action
+            android:id="@+id/action_order1Fragment_to_remainsFragment"
+            app:destination="@id/remainsFragment" />
+        <action
+            android:id="@+id/action_order1Fragment_to_order2Fragment"
+            app:destination="@id/order2Fragment" />
+        <action
+            android:id="@+id/action_order1Fragment_to_directoriesFragment"
+            app:destination="@id/directoriesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/remainsFragment"
+        android:name="com.example.meatorder.ui.RemainsFragment"
+        android:label="Остатки"
+        tools:layout="@layout/fragment_remains">
+        <action
+            android:id="@+id/action_remainsFragment_to_order2Fragment"
+            app:destination="@id/order2Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/order2Fragment"
+        android:name="com.example.meatorder.ui.Order2Fragment"
+        android:label="Заказ2"
+        tools:layout="@layout/fragment_order2">
+        <argument
+            android:name="byBalance"
+            app:argType="boolean" />
+        <argument
+            android:name="templateIds"
+            app:argType="integer[]" />
+        <argument
+            android:name="preSelectedIds"
+            app:argType="integer[]"
+            android:defaultValue="@null" />
+        <action
+            android:id="@+id/action_order2Fragment_to_order3Fragment"
+            app:destination="@id/order3Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/order3Fragment"
+        android:name="com.example.meatorder.ui.Order3Fragment"
+        android:label="Заказ3"
+        tools:layout="@layout/fragment_order3">
+        <argument
+            android:name="selectedItemsJson"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_order3Fragment_to_order4Fragment"
+            app:destination="@id/order4Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/order4Fragment"
+        android:name="com.example.meatorder.ui.Order4Fragment"
+        android:label="Заказ4"
+        tools:layout="@layout/fragment_order4">
+        <argument
+            android:name="finalItemsJson"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.meatorder.ui.SettingsFragment"
+        android:label="Настройки"
+        tools:layout="@layout/fragment_settings">
+        <action
+            android:id="@+id/action_settingsFragment_to_fontSettingsFragment"
+            app:destination="@id/fontSettingsFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_colorSettingsFragment"
+            app:destination="@id/colorSettingsFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_directoriesFragment"
+            app:destination="@id/directoriesFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fontSettingsFragment"
+        android:name="com.example.meatorder.ui.FontSettingsFragment"
+        android:label="Размер шрифта"
+        tools:layout="@layout/fragment_font_settings" />
+
+    <fragment
+        android:id="@+id/colorSettingsFragment"
+        android:name="com.example.meatorder.ui.ColorSettingsFragment"
+        android:label="Цвета темы"
+        tools:layout="@layout/fragment_color_settings" />
+
+    <fragment
+        android:id="@+id/directoriesFragment"
+        android:name="com.example.meatorder.ui.DirectoriesFragment"
+        android:label="Справочники"
+        tools:layout="@layout/fragment_directories" />
+</navigation>
