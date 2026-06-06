@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
-    <include layout="@layout/header" android:id="@+id/header" />
+    <include layout="@layout/header" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerOrder3"
