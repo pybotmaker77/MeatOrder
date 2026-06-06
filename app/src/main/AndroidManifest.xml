@@ -8,7 +8,7 @@
     <application
         android:name=".MeatOrderApp"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@android:mipmap/sym_def_app_icon"
         android:label="Заказ мяса"
         android:theme="@style/Theme.MeatOrder">
         <activity
