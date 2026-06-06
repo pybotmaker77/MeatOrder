@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -80,15 +81,15 @@ class Order4Fragment : Fragment() {
 
             binding.tvFinalText.text = finalText
 
+            // Прямое использование binding.btnCopy без создания переменной
             binding.btnCopy.setOnClickListener {
                 val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText("order", finalText))
-                var btn = binding.btnCopy
-                btn.text = "Скопировано ✓"
-                btn.setTextColor(Color.GREEN)
-                btn.postDelayed({
-                    btn.text = "Копировать"
-                    btn.setTextColor(Color.BLACK)
+                binding.btnCopy.text = "Скопировано ✓"
+                binding.btnCopy.setTextColor(Color.GREEN)
+                binding.btnCopy.postDelayed({
+                    binding.btnCopy.text = "Копировать"
+                    binding.btnCopy.setTextColor(Color.BLACK)
                 }, 2000)
                 getPrefs().clearDraft()
             }
