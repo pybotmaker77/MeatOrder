@@ -27,18 +27,14 @@ class Order1Fragment : Fragment() {
         binding.btnBalance.setOnClickListener {
             findNavController().navigate(R.id.action_order1Fragment_to_remainsFragment)
         }
-
         binding.btnFromScratch.setOnClickListener {
             findNavController().navigate(R.id.action_order1Fragment_to_order2Fragment)
         }
-
         binding.btnFromTemplate.setOnClickListener {
-            // показываем toast как заглушку
-            android.widget.Toast.makeText(requireContext(), "Выбор шаблона (в разработке)", android.widget.Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_order1Fragment_to_order2Fragment)
         }
-
         binding.btnTemplates.setOnClickListener {
-            android.widget.Toast.makeText(requireContext(), "Шаблоны (в разработке)", android.widget.Toast.LENGTH_SHORT).show()
+            findNavController().navigate(R.id.action_order1Fragment_to_directoriesFragment)
         }
     }
 
