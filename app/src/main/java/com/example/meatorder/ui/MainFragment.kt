@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
-import androidx.fragment.Fragment
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentMainBinding
@@ -35,8 +35,8 @@ class MainFragment : Fragment() {
 
         if (!prefs.draftOrderJson.isNullOrEmpty()) {
             AlertDialog.Builder(requireContext())
-                .setTitle("Незавершенный заказ")
-                .setMessage("У вас есть незавершенный заказ. Продолжить?")
+                .setTitle("Незавершённый заказ")
+                .setMessage("У вас есть незавершённый заказ. Продолжить?")
                 .setPositiveButton("Да") { _, _ ->
                     findNavController().navigate(R.id.action_mainFragment_to_order2Fragment)
                 }
