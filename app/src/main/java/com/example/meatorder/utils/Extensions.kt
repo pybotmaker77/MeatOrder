@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
-import androidx.fragment.Fragment
+import androidx.fragment.app.Fragment
 import com.example.meatorder.MeatOrderApp
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -14,9 +14,9 @@ fun Fragment.showToast(message: String) {
     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
 }
 
-fun Fragment.getApp() = requireActivity().application as MeatOrderApp
-fun Fragment.getDao() = (requireActivity().application as MeatOrderApp).database.dao()
-fun Fragment.getPrefs() = (requireActivity().application as MeatOrderApp).prefs
+fun Fragment.getApp(): MeatOrderApp = requireActivity().application as MeatOrderApp
+fun Fragment.getDao() = getApp().database.dao()
+fun Fragment.getPrefs() = getApp().prefs
 
 fun Fragment.pickFile(launcher: ActivityResultLauncher<Intent>, mimeType: String = "*/*") {
     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
