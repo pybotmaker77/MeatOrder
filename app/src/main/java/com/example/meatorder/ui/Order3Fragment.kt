@@ -162,11 +162,17 @@ class Order3Fragment : Fragment() {
                 val selectedId = rg.checkedRadioButtonId
                 if (selectedId != -1) {
                     val selIndex = rg.indexOfChild(dialogView.findViewById(selectedId))
-                    item.inputType = inputTypes[selIndex]
-                    item.quantity = etQty.text.toString().toIntOrNull() ?: 0
-                    adapter.notifyDataSetChanged()
-                    updateSummary()
-                    saveDraft()
+                    val newType = inputTypes[selIndex]
+                    val newQty = etQty.text.toString().toIntOrNull() ?: 0
+
+                    // Ищем позицию в списке и обновляем
+                    val pos = items.indexOfFirst { it.entityId == item.entityId }
+                    if (pos >= 0) {
+                        items[pos] = items[pos].copy(inputType = newType, quantity = newQty)
+                        adapter.notifyItemChanged(pos)
+                        updateSummary()
+                        saveDraft()
+                    }
                 }
             }
             .setNegativeButton("Отмена", null)
