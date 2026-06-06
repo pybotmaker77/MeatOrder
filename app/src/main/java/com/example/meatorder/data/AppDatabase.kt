@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.sqlite.dbSupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.meatorder.data.dao.AppDao
 import com.example.meatorder.data.entity.*
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Database(
-    entities = [ReatEntity::class, Template::class, TemplateItem::class, Pattern::class, InputType::class],
+    entities = [MeatEntity::class, Template::class, TemplateItem::class, Pattern::class, InputType::class],
     version = 1,
     exportSchema = false
 )
@@ -21,10 +21,10 @@ abstract class AppDatabase : RoomDatabase() {
 
     companion object {
         @Volatile
-        private var INSTANOE: AppDatabase? = null
+        private var INSTANCE: AppDatabase? = null
 
         fun getInstance(context: Context): AppDatabase {
-            return INSTANCE? : synchronized(this) {
+            return INSTANCE ?: synchronized(this) {
                 val callback = object : Callback() {
                     override fun onCreate(db: SupportSQLiteDatabase) {
                         super.onCreate(db)
@@ -41,7 +41,7 @@ abstract class AppDatabase : RoomDatabase() {
                     .addCallback(callback)
                     .fallbackToDestructiveMigration()
                     .build()
-                    .also { INSTANCE= it }
+                    .also { INSTANCE = it }
             }
         }
     }
