@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_mainFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_mainFragment_to_order2Fragment"
+            app:destination="@id/order2Fragment" />
     </fragment>
 
     <fragment
@@ -94,6 +97,12 @@
         <action
             android:id="@+id/action_settingsFragment_to_fontSettingsFragment"
             app:destination="@id/fontSettingsFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_colorSettingsFragment"
+            app:destination="@id/colorSettingsFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_directoriesFragment"
+            app:destination="@id/directoriesFragment" />
     </fragment>
 
     <fragment
@@ -101,4 +110,16 @@
         android:name="com.example.meatorder.ui.FontSettingsFragment"
         android:label="Размер шрифта"
         tools:layout="@layout/fragment_font_settings" />
+
+    <fragment
+        android:id="@+id/colorSettingsFragment"
+        android:name="com.example.meatorder.ui.ColorSettingsFragment"
+        android:label="Цвета темы"
+        tools:layout="@layout/fragment_color_settings" />
+
+    <fragment
+        android:id="@+id/directoriesFragment"
+        android:name="com.example.meatorder.ui.DirectoriesFragment"
+        android:label="Справочники"
+        tools:layout="@layout/fragment_directories" />
 </navigation>
