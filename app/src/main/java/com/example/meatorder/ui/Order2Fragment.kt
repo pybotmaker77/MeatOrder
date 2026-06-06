@@ -25,7 +25,6 @@ class Order2Fragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.fabSubmit.setOnClickListener {
-            // заглушка – переход к Order3 с пустым заказом
             val bundle = Bundle().apply {
                 putString("selectedItemsJson", "[]")
             }
