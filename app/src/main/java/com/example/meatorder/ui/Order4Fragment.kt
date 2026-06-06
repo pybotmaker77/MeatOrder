@@ -83,7 +83,7 @@ class Order4Fragment : Fragment() {
             binding.btnCopy.setOnClickListener {
                 val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 clipboard.setPrimaryClip(ClipData.newPlainText("order", finalText))
-                val btn = binding.btnCopy
+                var btn = binding.btnCopy
                 btn.text = "Скопировано ✓"
                 btn.setTextColor(Color.GREEN)
                 btn.postDelayed({
