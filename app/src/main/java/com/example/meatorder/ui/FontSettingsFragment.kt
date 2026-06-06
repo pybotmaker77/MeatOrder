@@ -1,4 +1,4 @@
-﻿package com.example.meatorder.ui
+package com.example.meatorder.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,17 +16,16 @@ class FontSettingsFragment : Fragment() {
     private var _binding: FragmentFontSettingsBinding? = null
     private val binding get() = _binding!!
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentFontSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.header.setNavigationOnClickListener { findNavController().popBackStack() }
+        // Находим Toolbar по id (в макете <include> должен иметь id)
+        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
+        header?.setNavigationOnClickListener { findNavController().popBackStack() }
 
         val prefs = getPrefs()
         var currentSize = prefs.fontSize
