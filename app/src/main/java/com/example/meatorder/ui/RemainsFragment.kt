@@ -1,4 +1,4 @@
-﻿package com.example.meatorder.ui
+package com.example.meatorder.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -17,17 +17,15 @@ class RemainsFragment : Fragment() {
     private var _binding: FragmentRemainsBinding? = null
     private val binding get() = _binding!!
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentRemainsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.header.setNavigationOnClickListener { findNavController().popBackStack() }
+        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
+        header?.setNavigationOnClickListener { findNavController().popBackStack() }
 
         val dao = getDao()
         lifecycleScope.launch {
@@ -41,12 +39,12 @@ class RemainsFragment : Fragment() {
                     val emptyEntities = entities.filter {
                         it.id !in quantities.keys || quantities[it.id] == 0
                     }.map { it.id }.toIntArray()
-                    val action = RemainsFragmentDirections.actionRemainsFragmentToOrder2Fragment(
-                        byBalance = true,
-                        templateIds = intArrayOf(),
-                        preSelectedIds = emptyEntities
-                    )
-                    findNavController().navigate(action)
+                    val bundle = Bundle().apply {
+                        putBoolean("byBalance", true)
+                        putIntArray("templateIds", intArrayOf())
+                        putIntArray("preSelectedIds", emptyEntities)
+                    }
+                    findNavController().navigate(R.id.action_remainsFragment_to_order2Fragment, bundle)
                 }
             }
         }
