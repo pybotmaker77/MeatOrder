@@ -1,4 +1,4 @@
-﻿package com.example.meatorder.ui
+package com.example.meatorder.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,8 +9,15 @@ import com.example.meatorder.databinding.FragmentColorSettingsBinding
 
 class ColorSettingsFragment : Fragment() {
     private var _binding: FragmentColorSettingsBinding? = null
+    private val binding get() = _binding!!
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentColorSettingsBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
