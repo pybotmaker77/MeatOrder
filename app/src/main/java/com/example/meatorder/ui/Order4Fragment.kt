@@ -29,11 +29,8 @@ class Order4Fragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
-        header?.setNavigationOnClickListener { findNavController().popBackStack() }
 
         val finalText = arguments?.getString("finalItemsJson") ?: "Нет данных"
-
         binding.tvFinalText.text = finalText
 
         binding.btnCopy.setOnClickListener {
