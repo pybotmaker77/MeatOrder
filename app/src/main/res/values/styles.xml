@@ -1,4 +1,4 @@
-﻿<resources>
+<resources>
     <style name="Theme.MeatOrder" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">#000000</item>
         <item name="colorOnPrimary">#FFFFFF</item>
