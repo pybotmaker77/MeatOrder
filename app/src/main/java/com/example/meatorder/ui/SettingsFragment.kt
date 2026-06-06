@@ -1,4 +1,4 @@
-﻿package com.example.meatorder.ui
+package com.example.meatorder.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -23,7 +23,8 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.header.setNavigationOnClickListener { findNavController().popBackStack() }
+        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
+        header?.setNavigationOnClickListener { findNavController().popBackStack() }
         binding.btnFont.setOnClickListener { findNavController().navigate(R.id.action_settingsFragment_to_fontSettingsFragment) }
         binding.btnColors.setOnClickListener { findNavController().navigate(R.id.action_settingsFragment_to_colorSettingsFragment) }
         binding.btnDirectories.setOnClickListener { findNavController().navigate(R.id.action_settingsFragment_to_directoriesFragment) }
