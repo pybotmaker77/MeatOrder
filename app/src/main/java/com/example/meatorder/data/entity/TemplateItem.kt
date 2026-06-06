@@ -2,6 +2,7 @@ package com.example.meatorder.data.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
@@ -18,6 +19,10 @@ import androidx.room.PrimaryKey
             parentColumns = ["id"],
             childColumns = ["entity_id"]
         )
+    ],
+    indices = [
+        Index("template_id"),
+        Index("entity_id")
     ]
 )
 data class TemplateItem(
