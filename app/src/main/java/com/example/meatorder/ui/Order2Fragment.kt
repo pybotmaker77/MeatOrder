@@ -1,111 +1,36 @@
 package com.example.meatorder.ui
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.RadioButton
-import android.widget.RadioGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.meatorder.R
-import com.example.meatorder.data.entity.InputType
-import com.example.meatorder.data.entity.TemplateItem
 import com.example.meatorder.databinding.FragmentOrder2Binding
-import com.example.meatorder.utils.getDao
-import com.example.meatorder.utils.getPrefs
-import com.example.meatorder.utils.showToast
-import com.google.gson.Gson
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 class Order2Fragment : Fragment() {
     private var _binding: FragmentOrder2Binding? = null
     private val binding get() = _binding!!
-    private lateinit var adapter: Order2Adapter
-    private var allItems = mutableListOf<Order2Item>()
-    private var inputTypes = listOf<InputType>()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentOrder2Binding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
-        header?.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        val dao = getDao()
-        val args = arguments
-        val byBalance = args?.getBoolean("byBalance", false) ?: false
-        val templateIds = args?.getIntArray("templateIds")?.toList() ?: emptyList()
-        val preSelectedIds = args?.getIntArray("preSelectedIds")?.toList() ?: emptyList()
-
-        lifecycleScope.launch {
-            inputTypes = dao.getAllInputTypes().first()
-            val entities = dao.getAllEntities().first()
-            val templateItems = mutableListOf<TemplateItem>()
-            for (tId in templateIds) {
-                val items = dao.getTemplateItems(tId).first()
-                templateItems.addAll(items)
+        binding.fabSubmit.setOnClickListener {
+            // заглушка – переход к Order3 с пустым заказом
+            val bundle = Bundle().apply {
+                putString("selectedItemsJson", "[]")
             }
-            val grouped = entities.groupBy { it.group }
-            val list = mutableListOf<Order2Item>()
-            for ((group, ents) in grouped) {
-                list.add(Order2Item(entity = null, group = group))
-                for (ent in ents) {
-                    val templateItem = templateItems.find { it.entity_id == ent.id }
-                    val selected = if (byBalance && ent.id in preSelectedIds) true
-                    else templateItem != null
-                    val item = Order2Item(
-                        entity = ent,
-                        group = group,
-                        selected = selected,
-                        inputType = if (templateItem != null) inputTypes.find { it.type_name == templateItem.input_type } else null,
-                        quantity = templateItem?.input_default ?: 0
-                    )
-                    list.add(item)
-                }
-            }
-            allItems = list
-            adapter = Order2Adapter({ item, position -> showSelectFormDialog(item, position) }, inputTypes)
-            binding.recyclerOrder2.layoutManager = LinearLayoutManager(requireContext())
-            binding.recyclerOrder2.adapter = adapter
-            adapter.submitList(allItems)
-
-            binding.fabSubmit.setOnClickListener {
-                val selected = allItems.filter {
-                    it.entity != null && it.selected && it.inputType != null && it.quantity > 0
-                }
-                if (selected.isEmpty()) {
-                    showToast("Выберите хотя бы одну позицию")
-                } else {
-                    val selectedJson = Gson().toJson(selected.map {
-                        mapOf(
-                            "entity_id" to it.entity!!.id,
-                            "entity" to it.entity.entity,
-                            "group" to it.group,
-                            "input_type" to it.inputType!!.type_name,
-                            "quantity" to it.quantity
-                        )
-                    })
-                    getPrefs().saveDraft(selectedJson)
-                    val bundle = Bundle().apply {
-                        putString("selectedItemsJson", selectedJson)
-                    }
-                    findNavController().navigate(R.id.action_order2Fragment_to_order3Fragment, bundle)
-                }
-            }
+            findNavController().navigate(R.id.action_order2Fragment_to_order3Fragment, bundle)
         }
-    }
-
-    private fun showSelectFormDialog(item: Order2Item, position: Int) {
-        // ... без изменений
     }
 
     override fun onDestroyView() {
