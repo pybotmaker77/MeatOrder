@@ -7,21 +7,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # заставляем использовать Node.js 24
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true   # разрешаем Node.js 20 для actions (пока не обновлены)
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Print environment info
+        run: |
+          java -version
+          chmod +x gradlew
+          ./gradlew --version
 
-      - name: Build APK with detailed output
-        run: ./gradlew assembleDebug --info --stacktrace
+      - name: Clean and Build APK with stacktrace
+        run: ./gradlew clean assembleDebug --stacktrace --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
