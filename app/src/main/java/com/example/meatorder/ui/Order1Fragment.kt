@@ -12,6 +12,7 @@ import com.example.meatorder.R
 import com.example.meatorder.data.entity.Template
 import com.example.meatorder.databinding.FragmentOrder1Binding
 import com.example.meatorder.utils.getDao
+import com.example.meatorder.utils.getPrefs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -36,7 +37,7 @@ class Order1Fragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
-        
+
         binding.btnBalance.setOnClickListener {
             findNavController().navigate(R.id.action_order1Fragment_to_remainsFragment)
         }
