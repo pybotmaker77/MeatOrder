@@ -4,5 +4,8 @@
     android:layout_height="match_parent"
     android:background="@android:color/white"
     android:gravity="center">
-    <TextView android:text="Настройки цвета (в разработке)" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Настройки цвета (в разработке)" />
 </LinearLayout>
