@@ -1,7 +1,6 @@
 package com.example.meatorder.ui
 
 import android.app.AlertDialog
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -54,7 +53,7 @@ class DirectoryEditFragment : Fragment() {
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
 
-        // Добавляем кнопку импорта программно (в LinearLayout корневого макета)
+        // Добавляем кнопку импорта программно
         val importButton = Button(requireContext()).apply {
             text = "Импорт"
             setOnClickListener {
@@ -90,15 +89,16 @@ class DirectoryEditFragment : Fragment() {
                         Toast.makeText(requireContext(), "Номенклатура импортирована (${entities.size} поз.)", Toast.LENGTH_SHORT).show()
                     }
                     "templates" -> {
-                        val templates = parseTemplatesJson(text)
-                        for (template in templates) {
-                            val existing = getDao().getAllTemplates().first().find { it.temp == template.temp }
+                        val importTemplates = parseTemplatesJson(text)
+                        for (importTemplate in importTemplates) {
+                            val existing = getDao().getAllTemplates().first().find { it.temp == importTemplate.name }
                             if (existing != null) {
-                                // Обновляем существующий шаблон (удаляем старые элементы и вставляем новые)
+                                // Обновляем существующий шаблон (удаляем старые элементы)
                                 getDao().deleteTemplate(existing)
                             }
-                            val newId = getDao().insertTemplate(template)
-                            for (item in template.items) {
+                            val newTemplate = Template(temp = importTemplate.name)
+                            val newId = getDao().insertTemplate(newTemplate)
+                            for (item in importTemplate.items) {
                                 val entity = getDao().getAllEntities().first().find { it.entity == item.entity }
                                 if (entity != null) {
                                     getDao().insertTemplateItem(
@@ -112,7 +112,7 @@ class DirectoryEditFragment : Fragment() {
                                 }
                             }
                         }
-                        Toast.makeText(requireContext(), "Шаблоны импортированы (${templates.size} шт.)", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Шаблоны импортированы (${importTemplates.size} шт.)", Toast.LENGTH_SHORT).show()
                     }
                     "input_types" -> {
                         Toast.makeText(requireContext(), "Импорт единиц измерения пока не поддерживается", Toast.LENGTH_SHORT).show()
