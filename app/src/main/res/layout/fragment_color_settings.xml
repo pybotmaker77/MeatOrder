@@ -4,24 +4,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@android:color/white"
-    android:gravity="center"
-    android:padding="16dp">
+    android:background="@android:color/white">
+
+    <include
+        android:id="@+id/header"
+        layout="@layout/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Нажмите на экран для смены цвета хедера\n(Чёрный → Красный → Синий)"
         android:textSize="16sp"
-        android:gravity="center" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="16dp" />
+        android:gravity="center"
+        android:layout_margin="16dp" />
 
     <Button
         android:id="@+id/btnPickImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Выбрать фоновое изображение" />
+        android:text="Выбрать фоновое изображение"
+        android:layout_gravity="center" />
 </LinearLayout>
