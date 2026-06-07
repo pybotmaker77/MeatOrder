@@ -27,13 +27,29 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <Button android:id="@+id/btnBalance" style="@style/MeatButton"
-            android:text="Заказ по остаткам" />
-        <Button android:id="@+id/btnFromScratch" style="@style/MeatButton"
-            android:text="Заказ с нуля" />
-        <Button android:id="@+id/btnFromTemplate" style="@style/MeatButton"
-            android:text="Заказ из шаблона" />
-        <Button android:id="@+id/btnTemplates" style="@style/MeatButton"
-            android:text="Шаблоны" />
+        <Button
+            android:id="@+id/btnBalance"
+            style="@style/MeatButton"
+            android:text="Заказ по остаткам"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/btnFromScratch"
+            style="@style/MeatButton"
+            android:text="Заказ с нуля"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/btnFromTemplate"
+            style="@style/MeatButton"
+            android:text="Заказ из шаблона"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/btnTemplates"
+            style="@style/MeatButton"
+            android:text="Шаблоны"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
