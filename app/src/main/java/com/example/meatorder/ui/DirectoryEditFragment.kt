@@ -1,14 +1,17 @@
 package com.example.meatorder.ui
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -18,9 +21,9 @@ import com.example.meatorder.R
 import com.example.meatorder.data.dao.AppDao
 import com.example.meatorder.data.entity.*
 import com.example.meatorder.databinding.FragmentDirectoryEditBinding
-import com.example.meatorder.utils.getDao
-import com.example.meatorder.utils.getPrefs
+import com.example.meatorder.utils.*
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class DirectoryEditFragment : Fragment() {
@@ -28,6 +31,11 @@ class DirectoryEditFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var adapter: RecyclerView.Adapter<*>
     private var dict: String = "entities"
+
+    // Лаунчер для выбора файла импорта
+    private val importFileLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { handleImportFile(it) }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -46,6 +54,15 @@ class DirectoryEditFragment : Fragment() {
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
 
+        // Добавляем кнопку импорта программно (в LinearLayout корневого макета)
+        val importButton = Button(requireContext()).apply {
+            text = "Импорт"
+            setOnClickListener {
+                importFileLauncher.launch(arrayOf("*/*"))
+            }
+        }
+        (binding.root as? LinearLayout)?.addView(importButton, 1) // после хедера
+
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         binding.fabAdd.setOnClickListener { showAddDialog(dict) }
@@ -57,6 +74,55 @@ class DirectoryEditFragment : Fragment() {
                 "templates" -> setupTemplates(dao)
                 "input_types" -> setupInputTypes(dao)
                 "patterns" -> setupPatterns(dao)
+            }
+        }
+    }
+
+    private fun handleImportFile(uri: android.net.Uri) {
+        lifecycleScope.launch {
+            try {
+                val text = readTextFromUri(uri, requireActivity())
+                when (dict) {
+                    "entities" -> {
+                        val pairs = parseEntitiesCsv(text)
+                        val entities = pairs.map { MeatEntity(entity = it.first, group = it.second) }
+                        getDao().insertEntities(entities)
+                        Toast.makeText(requireContext(), "Номенклатура импортирована (${entities.size} поз.)", Toast.LENGTH_SHORT).show()
+                    }
+                    "templates" -> {
+                        val templates = parseTemplatesJson(text)
+                        for (template in templates) {
+                            val existing = getDao().getAllTemplates().first().find { it.temp == template.temp }
+                            if (existing != null) {
+                                // Обновляем существующий шаблон (удаляем старые элементы и вставляем новые)
+                                getDao().deleteTemplate(existing)
+                            }
+                            val newId = getDao().insertTemplate(template)
+                            for (item in template.items) {
+                                val entity = getDao().getAllEntities().first().find { it.entity == item.entity }
+                                if (entity != null) {
+                                    getDao().insertTemplateItem(
+                                        TemplateItem(
+                                            template_id = newId.toInt(),
+                                            entity_id = entity.id,
+                                            input_type = item.input_type,
+                                            input_default = item.input_default
+                                        )
+                                    )
+                                }
+                            }
+                        }
+                        Toast.makeText(requireContext(), "Шаблоны импортированы (${templates.size} шт.)", Toast.LENGTH_SHORT).show()
+                    }
+                    "input_types" -> {
+                        Toast.makeText(requireContext(), "Импорт единиц измерения пока не поддерживается", Toast.LENGTH_SHORT).show()
+                    }
+                    "patterns" -> {
+                        Toast.makeText(requireContext(), "Импорт паттернов пока не поддерживается", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Ошибка импорта: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
