@@ -28,18 +28,24 @@ class DirectoriesFragment : Fragment() {
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
 
         binding.btnEntities.setOnClickListener {
-            // Переход к редактированию номенклатуры (пока заглушка)
-            findNavController().navigate(R.id.action_directoriesFragment_to_directoryEditFragment)
+            navigateToEditor("entities")
         }
         binding.btnTemplates.setOnClickListener {
-            findNavController().navigate(R.id.action_directoriesFragment_to_directoryEditFragment)
+            navigateToEditor("templates")
         }
         binding.btnPatterns.setOnClickListener {
-            findNavController().navigate(R.id.action_directoriesFragment_to_directoryEditFragment)
+            navigateToEditor("patterns")
         }
         binding.btnInputTypes.setOnClickListener {
-            findNavController().navigate(R.id.action_directoriesFragment_to_directoryEditFragment)
+            navigateToEditor("input_types")
         }
+    }
+
+    private fun navigateToEditor(dict: String) {
+        val bundle = Bundle().apply {
+            putString("dict", dict)
+        }
+        findNavController().navigate(R.id.action_directoriesFragment_to_directoryEditFragment, bundle)
     }
 
     override fun onDestroyView() {
