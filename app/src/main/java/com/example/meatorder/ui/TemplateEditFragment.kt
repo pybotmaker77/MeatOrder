@@ -51,7 +51,8 @@ class TemplateEditFragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.title = templateName
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
-
+        header?.setBackgroundColor(getPrefs().headerColor)
+        
         binding.recyclerViewItems.layoutManager = LinearLayoutManager(requireContext())
 
         val dao = getDao()
