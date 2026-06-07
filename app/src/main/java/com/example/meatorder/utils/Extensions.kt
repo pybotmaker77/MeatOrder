@@ -7,8 +7,6 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import com.example.meatorder.MeatOrderApp
-import com.example.meatorder.data.entity.Template
-import com.example.meatorder.data.entity.TemplateItem
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.BufferedReader
@@ -66,10 +64,7 @@ data class ImportTemplateItem(
     val input_default: Int
 )
 
-fun parseTemplatesJson(json: String): List<Template> {
+fun parseTemplatesJson(json: String): List<ImportTemplate> {
     val type = object : TypeToken<List<ImportTemplate>>() {}.type
-    val importList: List<ImportTemplate> = Gson().fromJson(json, type)
-    return importList.map { import ->
-        Template(temp = import.name)
-    }
+    return Gson().fromJson(json, type)
 }
