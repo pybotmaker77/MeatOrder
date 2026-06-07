@@ -54,6 +54,9 @@ interface AppDao {
     @Update
     suspend fun updatePattern(pattern: Pattern)
 
+    @Delete
+    suspend fun deletePattern(pattern: Pattern)
+
     @Query("UPDATE patterns SET is_active = 0")
     suspend fun deactivateAllPatterns()
 
