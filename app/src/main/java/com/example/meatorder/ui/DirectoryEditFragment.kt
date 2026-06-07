@@ -43,6 +43,8 @@ class DirectoryEditFragment : Fragment() {
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
+        // Применяем сохранённый цвет хедера
+        header?.setBackgroundColor(getPrefs().headerColor)
 
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
@@ -147,11 +149,26 @@ class DirectoryEditFragment : Fragment() {
                     val pattern = patterns[position]
                     holder.text1.text = pattern.name + if (pattern.is_active) " (активен)" else ""
                     holder.itemView.setOnClickListener {
-                        lifecycleScope.launch {
-                            dao.deactivateAllPatterns()
-                            dao.activatePattern(pattern.id)
-                            Toast.makeText(requireContext(), "Паттерн \"${pattern.name}\" активирован", Toast.LENGTH_SHORT).show()
+                        // Редактировать паттерн
+                        showEditPatternDialog(pattern)
+                    }
+                    holder.itemView.setOnLongClickListener {
+                        // Удалить паттерн (кроме базового, у которого id = 1)
+                        if (pattern.id == 1) {
+                            Toast.makeText(requireContext(), "Базовый паттерн нельзя удалить", Toast.LENGTH_SHORT).show()
+                        } else {
+                            AlertDialog.Builder(requireContext())
+                                .setTitle("Удалить паттерн")
+                                .setMessage("Удалить \"${pattern.name}\"?")
+                                .setPositiveButton("Да") { _, _ ->
+                                    lifecycleScope.launch {
+                                        dao.deletePattern(pattern)
+                                    }
+                                }
+                                .setNegativeButton("Нет", null)
+                                .show()
                         }
+                        true
                     }
                 }
                 override fun getItemCount() = patterns.size
@@ -224,9 +241,51 @@ class DirectoryEditFragment : Fragment() {
                     .show()
             }
             "patterns" -> {
-                Toast.makeText(requireContext(), "Добавление паттернов пока недоступно", Toast.LENGTH_SHORT).show()
+                val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+                val etName = EditText(requireContext()).apply { hint = "Название паттерна" }
+                val etTemplate = EditText(requireContext()).apply { hint = "Текст паттерна (например, - {entity} - {input} {input_type_short}.)" }
+                layout.addView(etName)
+                layout.addView(etTemplate)
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Добавить паттерн")
+                    .setView(layout)
+                    .setPositiveButton("Добавить") { _, _ ->
+                        val name = etName.text.toString().trim()
+                        val template = etTemplate.text.toString().trim()
+                        if (name.isNotEmpty() && template.isNotEmpty()) {
+                            lifecycleScope.launch {
+                                getDao().insertPattern(Pattern(name = name, template = template, is_active = false))
+                            }
+                        }
+                    }
+                    .setNegativeButton("Отмена", null)
+                    .show()
             }
         }
+    }
+
+    private fun showEditPatternDialog(pattern: Pattern) {
+        val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+        val etName = EditText(requireContext()).apply { setText(pattern.name) }
+        val etTemplate = EditText(requireContext()).apply { setText(pattern.template) }
+        layout.addView(etName)
+        layout.addView(etTemplate)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Редактировать паттерн")
+            .setView(layout)
+            .setPositiveButton("Сохранить") { _, _ ->
+                val newName = etName.text.toString().trim()
+                val newTemplate = etTemplate.text.toString().trim()
+                if (newName.isNotEmpty() && newTemplate.isNotEmpty()) {
+                    lifecycleScope.launch {
+                        val updated = Pattern(id = pattern.id, name = newName, template = newTemplate, is_active = pattern.is_active)
+                        getDao().updatePattern(updated)
+                    }
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
