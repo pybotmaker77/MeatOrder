@@ -86,11 +86,9 @@ class Order4Fragment : Fragment() {
             }
 
             binding.btnSend.setOnClickListener {
-                val sendIntent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, finalText)
-                    type = "text/plain"
-                }
+                val sendIntent = Intent(Intent.ACTION_SEND)
+                sendIntent.setType("text/plain")
+                sendIntent.putExtra(Intent.EXTRA_TEXT, finalText)
                 startActivity(Intent.createChooser(sendIntent, "Отправить заказ"))
                 getPrefs().clearDraft()
             }
