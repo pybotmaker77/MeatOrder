@@ -30,7 +30,8 @@ class RemainsFragment : Fragment() {
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
-
+        header?.setBackgroundColor(getPrefs().headerColor)
+        
         val dao = getDao()
         lifecycleScope.launch {
             dao.getAllEntities().collect { entities ->
