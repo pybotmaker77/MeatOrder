@@ -43,7 +43,8 @@ class Order2Fragment : Fragment() {
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
-
+        header?.setBackgroundColor(getPrefs().headerColor)
+        
         val dao = getDao()
         val args = arguments
         val byBalance = args?.getBoolean("byBalance", false) ?: false
