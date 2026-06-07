@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -53,14 +54,15 @@ class Order1Fragment : Fragment() {
             }
         }
 
+        // Временно заменяем переход на Toast, пока не добавлен DirectoriesFragment
         binding.btnTemplates.setOnClickListener {
-            findNavController().navigate(R.id.action_order1Fragment_to_directoriesFragment)
+            Toast.makeText(requireContext(), "Управление шаблонами (в разработке)", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun showTemplateDialog(templates: List<Template>) {
         if (templates.isEmpty()) {
-            android.widget.Toast.makeText(requireContext(), "Нет сохранённых шаблонов", android.widget.Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Нет сохранённых шаблонов", Toast.LENGTH_SHORT).show()
             return
         }
         val names = templates.map { it.temp }.toTypedArray()
