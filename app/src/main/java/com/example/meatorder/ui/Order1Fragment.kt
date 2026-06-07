@@ -33,6 +33,9 @@ class Order1Fragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
+        header?.setNavigationOnClickListener { findNavController().popBackStack() }
+
         binding.btnBalance.setOnClickListener {
             findNavController().navigate(R.id.action_order1Fragment_to_remainsFragment)
         }
@@ -54,7 +57,6 @@ class Order1Fragment : Fragment() {
             }
         }
 
-        // Временно заменяем переход на Toast, пока не добавлен DirectoriesFragment
         binding.btnTemplates.setOnClickListener {
             Toast.makeText(requireContext(), "Управление шаблонами (в разработке)", Toast.LENGTH_SHORT).show()
         }
