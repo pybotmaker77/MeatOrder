@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     android:background="@android:color/white">
 
-    <!-- header -->
     <include
         android:id="@+id/header"
         layout="@layout/header"
@@ -16,7 +15,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- контейнер кнопок -->
     <LinearLayout
         android:id="@+id/buttonsContainer"
         android:layout_width="0dp"
@@ -29,31 +27,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Заказ по остаткам -->
         <Button
             android:id="@+id/btnBalance"
             style="@style/MeatButton"
             android:text="Заказ по остаткам"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-        <!-- Заказ с нуля -->
         <Button
             android:id="@+id/btnFromScratch"
             style="@style/MeatButton"
             android:text="Заказ с нуля"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-        <!-- Заказ из шаблона -->
         <Button
             android:id="@+id/btnFromTemplate"
             style="@style/MeatButton"
             android:text="Заказ из шаблона"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-        <!-- Шаблоны -->
         <Button
             android:id="@+id/btnTemplates"
             style="@style/MeatButton"
