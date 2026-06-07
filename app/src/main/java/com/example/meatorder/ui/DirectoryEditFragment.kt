@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.meatorder.R
@@ -25,8 +24,8 @@ import kotlinx.coroutines.launch
 class DirectoryEditFragment : Fragment() {
     private var _binding: FragmentDirectoryEditBinding? = null
     private val binding get() = _binding!!
-    private val args: DirectoryEditFragmentArgs by navArgs()
     private lateinit var adapter: RecyclerView.Adapter<*>
+    private var dict: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,14 +38,16 @@ class DirectoryEditFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        dict = arguments?.getString("dict") ?: "entities"
+
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        binding.fabAdd.setOnClickListener { showAddDialog(args.dict) }
+        binding.fabAdd.setOnClickListener { showAddDialog(dict) }
 
         val dao = getDao()
         lifecycleScope.launch {
-            when (args.dict) {
+            when (dict) {
                 "entities" -> setupEntities(dao)
                 "templates" -> setupTemplates(dao)
                 "input_types" -> setupInputTypes(dao)
@@ -74,8 +75,6 @@ class DirectoryEditFragment : Fragment() {
                         .setPositiveButton("Да") { _, _ ->
                             lifecycleScope.launch {
                                 dao.deleteEntity(entity)
-                                // Обновить список можно, пересоздав фрагмент или повторно подписавшись.
-                                // Для простоты перезапустим фрагмент.
                                 findNavController().navigateUp()
                                 findNavController().navigate(R.id.directoryEditFragment)
                             }
@@ -169,7 +168,6 @@ class DirectoryEditFragment : Fragment() {
                         if (name.isNotEmpty()) {
                             lifecycleScope.launch {
                                 getDao().insertEntity(MeatEntity(entity = name, group = group))
-                                // Перезагрузим фрагмент, чтобы увидеть изменения
                                 findNavController().navigateUp()
                                 findNavController().navigate(R.id.directoryEditFragment)
                             }
