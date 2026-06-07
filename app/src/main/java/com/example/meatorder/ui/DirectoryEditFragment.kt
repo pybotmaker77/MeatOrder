@@ -15,17 +15,18 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.meatorder.R
+import com.example.meatorder.data.dao.AppDao
 import com.example.meatorder.data.entity.*
 import com.example.meatorder.databinding.FragmentDirectoryEditBinding
 import com.example.meatorder.utils.getDao
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class DirectoryEditFragment : Fragment() {
     private var _binding: FragmentDirectoryEditBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: RecyclerView.Adapter<*>
-    private var dict: String = ""
+    private var dict: String = "entities"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,6 +44,8 @@ class DirectoryEditFragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
 
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
         binding.fabAdd.setOnClickListener { showAddDialog(dict) }
 
         val dao = getDao()
@@ -56,99 +59,101 @@ class DirectoryEditFragment : Fragment() {
         }
     }
 
-    private suspend fun setupEntities(dao: com.example.meatorder.data.dao.AppDao) {
-        val entities = dao.getAllEntities().first()
-        adapter = object : RecyclerView.Adapter<ViewHolder>() {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-                val itemView = LayoutInflater.from(parent.context)
-                    .inflate(android.R.layout.simple_list_item_2, parent, false)
-                return ViewHolder(itemView)
-            }
-            override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-                val entity = entities[position]
-                holder.text1.text = entity.entity
-                holder.text2?.text = "Группа: ${entity.group}"
-                holder.itemView.setOnLongClickListener {
-                    AlertDialog.Builder(requireContext())
-                        .setTitle("Удалить")
-                        .setMessage("Удалить \"${entity.entity}\"?")
-                        .setPositiveButton("Да") { _, _ ->
-                            lifecycleScope.launch {
-                                dao.deleteEntity(entity)
-                                findNavController().navigateUp()
-                                findNavController().navigate(R.id.directoryEditFragment)
+    private suspend fun setupEntities(dao: AppDao) {
+        dao.getAllEntities().collectLatest { entities ->
+            adapter = object : RecyclerView.Adapter<ViewHolder>() {
+                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+                    val itemView = LayoutInflater.from(parent.context)
+                        .inflate(android.R.layout.simple_list_item_2, parent, false)
+                    return ViewHolder(itemView)
+                }
+                override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+                    val entity = entities[position]
+                    holder.text1.text = entity.entity
+                    holder.text2?.text = "Группа: ${entity.group}"
+                    holder.itemView.setOnLongClickListener {
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("Удалить")
+                            .setMessage("Удалить \"${entity.entity}\"?")
+                            .setPositiveButton("Да") { _, _ ->
+                                lifecycleScope.launch {
+                                    dao.deleteEntity(entity)
+                                }
                             }
-                        }
-                        .setNegativeButton("Нет", null)
-                        .show()
-                    true
-                }
-            }
-            override fun getItemCount() = entities.size
-        }
-        binding.recyclerView.adapter = adapter
-    }
-
-    private suspend fun setupTemplates(dao: com.example.meatorder.data.dao.AppDao) {
-        val templates = dao.getAllTemplates().first()
-        adapter = object : RecyclerView.Adapter<ViewHolder>() {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-                val itemView = LayoutInflater.from(parent.context)
-                    .inflate(android.R.layout.simple_list_item_1, parent, false)
-                return ViewHolder(itemView)
-            }
-            override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-                val template = templates[position]
-                holder.text1.text = template.temp
-                holder.itemView.setOnClickListener {
-                    Toast.makeText(requireContext(), "Редактирование шаблона (в разработке)", Toast.LENGTH_SHORT).show()
-                }
-            }
-            override fun getItemCount() = templates.size
-        }
-        binding.recyclerView.adapter = adapter
-    }
-
-    private suspend fun setupInputTypes(dao: com.example.meatorder.data.dao.AppDao) {
-        val inputTypes = dao.getAllInputTypes().first()
-        adapter = object : RecyclerView.Adapter<ViewHolder>() {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-                val itemView = LayoutInflater.from(parent.context)
-                    .inflate(android.R.layout.simple_list_item_2, parent, false)
-                return ViewHolder(itemView)
-            }
-            override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-                val type = inputTypes[position]
-                holder.text1.text = type.type_name
-                holder.text2?.text = "Сокр.: ${type.short_name}, Вес: ${type.weight_kg} кг"
-            }
-            override fun getItemCount() = inputTypes.size
-        }
-        binding.recyclerView.adapter = adapter
-    }
-
-    private suspend fun setupPatterns(dao: com.example.meatorder.data.dao.AppDao) {
-        val patterns = dao.getAllPatterns().first()
-        adapter = object : RecyclerView.Adapter<ViewHolder>() {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-                val itemView = LayoutInflater.from(parent.context)
-                    .inflate(android.R.layout.simple_list_item_1, parent, false)
-                return ViewHolder(itemView)
-            }
-            override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-                val pattern = patterns[position]
-                holder.text1.text = pattern.name + if (pattern.is_active) " (активен)" else ""
-                holder.itemView.setOnClickListener {
-                    lifecycleScope.launch {
-                        dao.deactivateAllPatterns()
-                        dao.activatePattern(pattern.id)
-                        Toast.makeText(requireContext(), "Паттерн \"${pattern.name}\" активирован", Toast.LENGTH_SHORT).show()
+                            .setNegativeButton("Нет", null)
+                            .show()
+                        true
                     }
                 }
+                override fun getItemCount() = entities.size
             }
-            override fun getItemCount() = patterns.size
+            binding.recyclerView.adapter = adapter
         }
-        binding.recyclerView.adapter = adapter
+    }
+
+    private suspend fun setupTemplates(dao: AppDao) {
+        dao.getAllTemplates().collectLatest { templates ->
+            adapter = object : RecyclerView.Adapter<ViewHolder>() {
+                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+                    val itemView = LayoutInflater.from(parent.context)
+                        .inflate(android.R.layout.simple_list_item_1, parent, false)
+                    return ViewHolder(itemView)
+                }
+                override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+                    val template = templates[position]
+                    holder.text1.text = template.temp
+                    holder.itemView.setOnClickListener {
+                        Toast.makeText(requireContext(), "Редактирование шаблона (в разработке)", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                override fun getItemCount() = templates.size
+            }
+            binding.recyclerView.adapter = adapter
+        }
+    }
+
+    private suspend fun setupInputTypes(dao: AppDao) {
+        dao.getAllInputTypes().collectLatest { inputTypes ->
+            adapter = object : RecyclerView.Adapter<ViewHolder>() {
+                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+                    val itemView = LayoutInflater.from(parent.context)
+                        .inflate(android.R.layout.simple_list_item_2, parent, false)
+                    return ViewHolder(itemView)
+                }
+                override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+                    val type = inputTypes[position]
+                    holder.text1.text = type.type_name
+                    holder.text2?.text = "Сокр.: ${type.short_name}, Вес: ${type.weight_kg} кг"
+                }
+                override fun getItemCount() = inputTypes.size
+            }
+            binding.recyclerView.adapter = adapter
+        }
+    }
+
+    private suspend fun setupPatterns(dao: AppDao) {
+        dao.getAllPatterns().collectLatest { patterns ->
+            adapter = object : RecyclerView.Adapter<ViewHolder>() {
+                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+                    val itemView = LayoutInflater.from(parent.context)
+                        .inflate(android.R.layout.simple_list_item_1, parent, false)
+                    return ViewHolder(itemView)
+                }
+                override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+                    val pattern = patterns[position]
+                    holder.text1.text = pattern.name + if (pattern.is_active) " (активен)" else ""
+                    holder.itemView.setOnClickListener {
+                        lifecycleScope.launch {
+                            dao.deactivateAllPatterns()
+                            dao.activatePattern(pattern.id)
+                            // Toast убран, чтобы не мешать, но можно оставить
+                        }
+                    }
+                }
+                override fun getItemCount() = patterns.size
+            }
+            binding.recyclerView.adapter = adapter
+        }
     }
 
     private fun showAddDialog(dict: String) {
@@ -168,8 +173,6 @@ class DirectoryEditFragment : Fragment() {
                         if (name.isNotEmpty()) {
                             lifecycleScope.launch {
                                 getDao().insertEntity(MeatEntity(entity = name, group = group))
-                                findNavController().navigateUp()
-                                findNavController().navigate(R.id.directoryEditFragment)
                             }
                         }
                     }
@@ -186,8 +189,6 @@ class DirectoryEditFragment : Fragment() {
                         if (name.isNotEmpty()) {
                             lifecycleScope.launch {
                                 getDao().insertTemplate(Template(temp = name))
-                                findNavController().navigateUp()
-                                findNavController().navigate(R.id.directoryEditFragment)
                             }
                         }
                     }
@@ -212,8 +213,6 @@ class DirectoryEditFragment : Fragment() {
                         if (name.isNotEmpty() && short.isNotEmpty()) {
                             lifecycleScope.launch {
                                 getDao().insertInputType(InputType(type_name = name, short_name = short, weight_kg = weight))
-                                findNavController().navigateUp()
-                                findNavController().navigate(R.id.directoryEditFragment)
                             }
                         }
                     }
