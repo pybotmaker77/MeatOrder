@@ -11,8 +11,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerDirectories"
+    <Button
+        android:id="@+id/btnEntities"
+        style="@style/MeatButton"
+        android:text="Номенклатура"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnTemplates"
+        style="@style/MeatButton"
+        android:text="Шаблоны"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnPatterns"
+        style="@style/MeatButton"
+        android:text="Паттерны"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btnInputTypes"
+        style="@style/MeatButton"
+        android:text="Единицы измерения"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </LinearLayout>
