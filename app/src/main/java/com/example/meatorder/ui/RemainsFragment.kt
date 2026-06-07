@@ -28,6 +28,9 @@ class RemainsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
+        header?.setNavigationOnClickListener { findNavController().popBackStack() }
+
         val dao = getDao()
         lifecycleScope.launch {
             dao.getAllEntities().collect { entities ->
@@ -37,7 +40,6 @@ class RemainsFragment : Fragment() {
 
                 binding.fabContinue.setOnClickListener {
                     val quantities = adapter.getQuantities()
-                    // Позиции, для которых не введён остаток (или он равен 0)
                     val emptyEntities = entities.filter {
                         it.id !in quantities.keys || quantities[it.id] == 0
                     }.map { it.id }.toIntArray()
