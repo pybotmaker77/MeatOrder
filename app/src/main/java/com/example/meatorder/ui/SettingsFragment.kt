@@ -23,6 +23,7 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         binding.btnFont.setOnClickListener {
             findNavController().navigate(R.id.action_settingsFragment_to_fontSettingsFragment)
         }
