@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentRemainsBinding
 import com.example.meatorder.utils.getDao
+import com.example.meatorder.utils.getPrefs
 import kotlinx.coroutines.launch
 
 class RemainsFragment : Fragment() {
@@ -31,7 +32,7 @@ class RemainsFragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
-        
+
         val dao = getDao()
         lifecycleScope.launch {
             dao.getAllEntities().collect { entities ->
