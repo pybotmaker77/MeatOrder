@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentColorSettingsBinding
 import com.example.meatorder.utils.getPrefs
 
@@ -20,7 +22,7 @@ class ColorSettingsFragment : Fragment() {
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
                 getPrefs().backgroundImagePath = uri.toString()
-                Toast.makeText(requireContext(), "Фоновое изображение выбрано. Перезапустите приложение, чтобы увидеть изменения.", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Фоновое изображение выбрано. Перезапустите приложение.", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -36,20 +38,24 @@ class ColorSettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
+        header?.setNavigationOnClickListener { findNavController().popBackStack() }
+
         val prefs = getPrefs()
 
-        // Смена цвета хедера по нажатию на корневой layout
+        // Смена цвета хедера с немедленным применением
         binding.colorSettingsRoot.setOnClickListener {
             val current = prefs.headerColor
-            when (current) {
-                Color.BLACK -> prefs.headerColor = Color.RED
-                Color.RED -> prefs.headerColor = Color.BLUE
-                else -> prefs.headerColor = Color.BLACK
+            val newColor = when (current) {
+                Color.BLACK -> Color.RED
+                Color.RED -> Color.BLUE
+                else -> Color.BLACK
             }
-            Toast.makeText(requireContext(), "Цвет хедера изменён. Перезапустите приложение, чтобы увидеть изменения.", Toast.LENGTH_LONG).show()
+            prefs.headerColor = newColor
+            // Перезапускаем Activity, чтобы изменения вступили в силу
+            requireActivity().recreate()
         }
 
-        // Кнопка выбора изображения
         binding.btnPickImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
