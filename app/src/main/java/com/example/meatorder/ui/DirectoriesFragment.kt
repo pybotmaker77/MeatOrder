@@ -36,8 +36,10 @@ class DirectoriesFragment : Fragment() {
     }
 
     private fun navigateToEditor(dict: String) {
-        val action = DirectoriesFragmentDirections.actionDirectoriesFragmentToDirectoryEditFragment(dict)
-        findNavController().navigate(action)
+        val bundle = Bundle().apply {
+            putString("dict", dict)
+        }
+        findNavController().navigate(R.id.action_directoriesFragment_to_directoryEditFragment, bundle)
     }
 
     override fun onDestroyView() {
