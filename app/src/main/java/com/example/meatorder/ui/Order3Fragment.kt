@@ -43,6 +43,9 @@ class Order3Fragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
+        header?.setNavigationOnClickListener { findNavController().popBackStack() }
+
         val selectedJson = arguments?.getString("selectedItemsJson") ?: return
         val type = object : TypeToken<List<Map<String, Any>>>() {}.type
         val rawList: List<Map<String, Any>> = Gson().fromJson(selectedJson, type)
