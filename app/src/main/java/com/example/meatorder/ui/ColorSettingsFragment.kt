@@ -40,7 +40,8 @@ class ColorSettingsFragment : Fragment() {
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
-
+        header?.setBackgroundColor(getPrefs().headerColor)
+        
         val prefs = getPrefs()
 
         // Смена цвета хедера с немедленным применением
