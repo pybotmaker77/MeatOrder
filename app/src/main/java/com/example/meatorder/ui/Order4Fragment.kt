@@ -53,7 +53,7 @@ class Order4Fragment : Fragment() {
                 val inputType = inputTypes.find { it.type_name == inputTypeName }
                 val shortName = inputType?.short_name ?: inputTypeName
 
-                var line = patternStr
+                val line = patternStr
                     .replace("{entity}", entity)
                     .replace("{input}", quantity.toString())
                     .replace("{input_type}", inputTypeName)
