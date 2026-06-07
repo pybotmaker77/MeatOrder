@@ -29,4 +29,16 @@
         android:text="Справочники"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/btnExport"
+        style="@style/MeatButton"
+        android:text="Экспорт настроек"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/btnImport"
+        style="@style/MeatButton"
+        android:text="Импорт настроек"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </LinearLayout>
