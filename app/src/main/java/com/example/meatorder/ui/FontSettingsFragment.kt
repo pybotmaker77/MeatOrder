@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentFontSettingsBinding
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
@@ -25,6 +27,9 @@ class FontSettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
+        header?.setNavigationOnClickListener { findNavController().popBackStack() }
 
         val prefs = getPrefs()
         var currentSize = prefs.fontSize
