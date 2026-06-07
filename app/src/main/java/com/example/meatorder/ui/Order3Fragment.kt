@@ -45,7 +45,8 @@ class Order3Fragment : Fragment() {
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
-
+        header?.setBackgroundColor(getPrefs().headerColor)
+        
         val selectedJson = arguments?.getString("selectedItemsJson") ?: return
         val type = object : TypeToken<List<Map<String, Any>>>() {}.type
         val rawList: List<Map<String, Any>> = Gson().fromJson(selectedJson, type)
