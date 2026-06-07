@@ -22,6 +22,7 @@ import com.example.meatorder.data.entity.MeatEntity
 import com.example.meatorder.data.entity.TemplateItem
 import com.example.meatorder.databinding.FragmentTemplateEditBinding
 import com.example.meatorder.utils.getDao
+import com.example.meatorder.utils.getPrefs
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -52,7 +53,7 @@ class TemplateEditFragment : Fragment() {
         header?.title = templateName
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
-        
+
         binding.recyclerViewItems.layoutManager = LinearLayoutManager(requireContext())
 
         val dao = getDao()
@@ -60,7 +61,6 @@ class TemplateEditFragment : Fragment() {
             entities = dao.getAllEntities().first()
             inputTypes = dao.getAllInputTypes().first()
 
-            // Загружаем элементы шаблона и подписываемся на изменения
             dao.getTemplateItems(templateId).collectLatest { items ->
                 updateList(items)
             }
