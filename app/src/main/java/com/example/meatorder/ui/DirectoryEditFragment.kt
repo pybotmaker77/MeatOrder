@@ -103,7 +103,11 @@ class DirectoryEditFragment : Fragment() {
                     val template = templates[position]
                     holder.text1.text = template.temp
                     holder.itemView.setOnClickListener {
-                        Toast.makeText(requireContext(), "Редактирование шаблона (в разработке)", Toast.LENGTH_SHORT).show()
+                        val bundle = Bundle().apply {
+                            putInt("templateId", template.id)
+                            putString("templateName", template.temp)
+                        }
+                        findNavController().navigate(R.id.action_directoryEditFragment_to_templateEditFragment, bundle)
                     }
                 }
                 override fun getItemCount() = templates.size
@@ -146,7 +150,7 @@ class DirectoryEditFragment : Fragment() {
                         lifecycleScope.launch {
                             dao.deactivateAllPatterns()
                             dao.activatePattern(pattern.id)
-                            // Toast убран, чтобы не мешать, но можно оставить
+                            Toast.makeText(requireContext(), "Паттерн \"${pattern.name}\" активирован", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
