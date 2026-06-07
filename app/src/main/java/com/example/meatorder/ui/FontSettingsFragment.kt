@@ -30,7 +30,8 @@ class FontSettingsFragment : Fragment() {
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
-
+        header?.setBackgroundColor(getPrefs().headerColor)
+        
         val prefs = getPrefs()
         var currentSize = prefs.fontSize
         binding.tvCurrentSize.text = "${currentSize}sp"
