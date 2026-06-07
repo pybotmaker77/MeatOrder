@@ -41,6 +41,9 @@ class Order2Fragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
+        header?.setNavigationOnClickListener { findNavController().popBackStack() }
+
         val dao = getDao()
         val args = arguments
         val byBalance = args?.getBoolean("byBalance", false) ?: false
