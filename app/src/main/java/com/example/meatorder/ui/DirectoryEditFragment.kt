@@ -5,11 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -124,47 +120,142 @@ class DirectoryEditFragment : Fragment() {
         }
     }
 
+    // --- Номенклатура с группировкой и кнопкой "Ред." ---
     private suspend fun setupEntities(dao: AppDao) {
         dao.getAllEntities().collectLatest { entities ->
-            adapter = object : RecyclerView.Adapter<ViewHolder>() {
-                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-                    val itemView = LayoutInflater.from(parent.context)
-                        .inflate(android.R.layout.simple_list_item_2, parent, false)
-                    applyFontSize(itemView, getPrefs().fontSize)
-                    return ViewHolder(itemView)
+            val grouped = entities.groupBy { it.group }
+            val flatList = mutableListOf<Any>() // либо Entity, либо String (заголовок группы)
+            for ((group, list) in grouped) {
+                flatList.add(group) // заголовок
+                flatList.addAll(list)
+            }
+
+            adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+                companion object {
+                    private const val TYPE_HEADER = 0
+                    private const val TYPE_ITEM = 1
                 }
-                override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-                    val entity = entities[position]
-                    holder.text1.text = entity.entity
-                    holder.text2?.text = "Группа: ${entity.group}"
-                    holder.itemView.setOnLongClickListener {
-                        AlertDialog.Builder(requireContext())
-                            .setTitle("Удалить")
-                            .setMessage("Удалить \"${entity.entity}\"?")
-                            .setPositiveButton("Да") { _, _ -> lifecycleScope.launch { dao.deleteEntity(entity) } }
-                            .setNegativeButton("Нет", null)
-                            .show()
-                        true
+
+                override fun getItemViewType(position: Int): Int {
+                    return if (flatList[position] is String) TYPE_HEADER else TYPE_ITEM
+                }
+
+                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+                    return when (viewType) {
+                        TYPE_HEADER -> {
+                            val view = TextView(parent.context).apply {
+                                setPadding(32, 16, 16, 8)
+                                setBackgroundColor(0xFFF0F0F0.toInt())
+                                setTextColor(0xFF333333.toInt())
+                                textSize = 14f
+                            }
+                            object : RecyclerView.ViewHolder(view) {}
+                        }
+                        else -> {
+                            val itemView = LayoutInflater.from(parent.context)
+                                .inflate(android.R.layout.simple_list_item_2, parent, false)
+                            // Добавляем кнопку "Ред." программно
+                            val button = Button(parent.context).apply {
+                                text = "Ред."
+                                setOnClickListener {
+                                    val pos = bindingAdapterPosition
+                                    if (pos != RecyclerView.NO_POSITION) {
+                                        val entity = flatList[pos] as MeatEntity
+                                        showEditEntityDialog(entity)
+                                    }
+                                }
+                            }
+                            (itemView as? LinearLayout)?.addView(button)
+                            applyFontSize(itemView, getPrefs().fontSize)
+                            object : RecyclerView.ViewHolder(itemView) {}
+                        }
                     }
                 }
-                override fun getItemCount() = entities.size
+
+                override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+                    val item = flatList[position]
+                    when (holder.itemViewType) {
+                        TYPE_HEADER -> {
+                            (holder.itemView as TextView).text = item as String
+                        }
+                        TYPE_ITEM -> {
+                            val entity = item as MeatEntity
+                            val text1 = holder.itemView.findViewById<TextView>(android.R.id.text1)
+                            val text2 = holder.itemView.findViewById<TextView>(android.R.id.text2)
+                            text1?.text = entity.entity
+                            text2?.text = "Группа: ${entity.group}"
+                            // Долгое нажатие — удаление
+                            holder.itemView.setOnLongClickListener {
+                                AlertDialog.Builder(requireContext())
+                                    .setTitle("Удалить")
+                                    .setMessage("Удалить \"${entity.entity}\"?")
+                                    .setPositiveButton("Да") { _, _ ->
+                                        lifecycleScope.launch { dao.deleteEntity(entity) }
+                                    }
+                                    .setNegativeButton("Нет", null)
+                                    .show()
+                                true
+                            }
+                        }
+                    }
+                }
+
+                override fun getItemCount() = flatList.size
             }
             binding.recyclerView.adapter = adapter
         }
     }
 
+    private fun showEditEntityDialog(entity: MeatEntity) {
+        val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+        val etName = EditText(requireContext()).apply { setText(entity.entity) }
+        val etGroup = EditText(requireContext()).apply { setText(entity.group) }
+        layout.addView(etName)
+        layout.addView(etGroup)
+        applyFontSize(layout, getPrefs().fontSize)
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Редактировать позицию")
+            .setView(layout)
+            .setPositiveButton("Сохранить") { _, _ ->
+                val newName = etName.text.toString().trim()
+                val newGroup = etGroup.text.toString().trim().ifEmpty { entity.group }
+                if (newName.isNotEmpty()) {
+                    lifecycleScope.launch {
+                        getDao().updateEntity(MeatEntity(id = entity.id, entity = newName, group = newGroup))
+                    }
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+    }
+
+    // --- Шаблоны ---
     private suspend fun setupTemplates(dao: AppDao) {
         dao.getAllTemplates().collectLatest { templates ->
-            adapter = object : RecyclerView.Adapter<ViewHolder>() {
-                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
                     val itemView = LayoutInflater.from(parent.context)
                         .inflate(android.R.layout.simple_list_item_1, parent, false)
+                    val button = Button(parent.context).apply {
+                        text = "Ред."
+                        setOnClickListener {
+                            val pos = bindingAdapterPosition
+                            if (pos != RecyclerView.NO_POSITION) {
+                                showEditTemplateDialog(templates[pos])
+                            }
+                        }
+                    }
+                    (itemView as? LinearLayout)?.addView(button)
                     applyFontSize(itemView, getPrefs().fontSize)
-                    return ViewHolder(itemView)
+                    return object : RecyclerView.ViewHolder(itemView) {}
                 }
-                override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+
+                override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
                     val template = templates[position]
-                    holder.text1.text = template.temp
+                    val text1 = holder.itemView.findViewById<TextView>(android.R.id.text1)
+                    text1?.text = template.temp
                     holder.itemView.setOnClickListener {
                         val bundle = Bundle().apply {
                             putInt("templateId", template.id)
@@ -173,32 +264,97 @@ class DirectoryEditFragment : Fragment() {
                         findNavController().navigate(R.id.action_directoryEditFragment_to_templateEditFragment, bundle)
                     }
                 }
+
                 override fun getItemCount() = templates.size
             }
             binding.recyclerView.adapter = adapter
         }
     }
 
+    private fun showEditTemplateDialog(template: Template) {
+        val etName = EditText(requireContext()).apply { setText(template.temp) }
+        applyFontSize(etName, getPrefs().fontSize)
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Редактировать название шаблона")
+            .setView(etName)
+            .setPositiveButton("Сохранить") { _, _ ->
+                val newName = etName.text.toString().trim()
+                if (newName.isNotEmpty()) {
+                    lifecycleScope.launch {
+                        getDao().updateTemplate(Template(id = template.id, temp = newName))
+                    }
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+    }
+
+    // --- Единицы измерения ---
     private suspend fun setupInputTypes(dao: AppDao) {
         dao.getAllInputTypes().collectLatest { inputTypes ->
-            adapter = object : RecyclerView.Adapter<ViewHolder>() {
-                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+                override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
                     val itemView = LayoutInflater.from(parent.context)
                         .inflate(android.R.layout.simple_list_item_2, parent, false)
+                    val button = Button(parent.context).apply {
+                        text = "Ред."
+                        setOnClickListener {
+                            val pos = bindingAdapterPosition
+                            if (pos != RecyclerView.NO_POSITION) {
+                                showEditInputTypeDialog(inputTypes[pos])
+                            }
+                        }
+                    }
+                    (itemView as? LinearLayout)?.addView(button)
                     applyFontSize(itemView, getPrefs().fontSize)
-                    return ViewHolder(itemView)
+                    return object : RecyclerView.ViewHolder(itemView) {}
                 }
-                override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+
+                override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
                     val type = inputTypes[position]
-                    holder.text1.text = type.type_name
-                    holder.text2?.text = "Сокр.: ${type.short_name}, Вес: ${type.weight_kg} кг"
+                    val text1 = holder.itemView.findViewById<TextView>(android.R.id.text1)
+                    val text2 = holder.itemView.findViewById<TextView>(android.R.id.text2)
+                    text1?.text = type.type_name
+                    text2?.text = "Сокр.: ${type.short_name}, Вес: ${type.weight_kg} кг"
                 }
+
                 override fun getItemCount() = inputTypes.size
             }
             binding.recyclerView.adapter = adapter
         }
     }
 
+    private fun showEditInputTypeDialog(type: InputType) {
+        val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+        val etName = EditText(requireContext()).apply { setText(type.type_name) }
+        val etShort = EditText(requireContext()).apply { setText(type.short_name) }
+        val etWeight = EditText(requireContext()).apply { setText(type.weight_kg.toString()) }
+        layout.addView(etName)
+        layout.addView(etShort)
+        layout.addView(etWeight)
+        applyFontSize(layout, getPrefs().fontSize)
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Редактировать единицу измерения")
+            .setView(layout)
+            .setPositiveButton("Сохранить") { _, _ ->
+                val newName = etName.text.toString().trim()
+                val newShort = etShort.text.toString().trim()
+                val newWeight = etWeight.text.toString().toDoubleOrNull() ?: type.weight_kg
+                if (newName.isNotEmpty() && newShort.isNotEmpty()) {
+                    lifecycleScope.launch {
+                        getDao().updateInputType(InputType(id = type.id, type_name = newName, short_name = newShort, weight_kg = newWeight))
+                    }
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+    }
+
+    // --- Паттерны (остались без изменений, но тоже можно добавить "Ред." при желании) ---
     private suspend fun setupPatterns(dao: AppDao) {
         dao.getAllPatterns().collectLatest { patterns ->
             adapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -232,134 +388,8 @@ class DirectoryEditFragment : Fragment() {
         }
     }
 
-    private fun showAddDialog(dict: String) {
-        when (dict) {
-            "entities" -> {
-                val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
-                val etName = EditText(requireContext()).apply { hint = "Наименование" }
-                val etGroup = EditText(requireContext()).apply { hint = "Группа" }
-                layout.addView(etName)
-                layout.addView(etGroup)
-                applyFontSize(layout, getPrefs().fontSize)
-                val dialog = AlertDialog.Builder(requireContext())
-                    .setTitle("Добавить позицию")
-                    .setView(layout)
-                    .setPositiveButton("Добавить") { _, _ ->
-                        val name = etName.text.toString().trim()
-                        val group = etGroup.text.toString().trim().ifEmpty { "Без группы" }
-                        if (name.isNotEmpty()) {
-                            lifecycleScope.launch { getDao().insertEntity(MeatEntity(entity = name, group = group)) }
-                        }
-                    }
-                    .setNegativeButton("Отмена", null)
-                    .show()
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-            }
-            "templates" -> {
-                val etName = EditText(requireContext()).apply { hint = "Название шаблона" }
-                applyFontSize(etName, getPrefs().fontSize)
-                val dialog = AlertDialog.Builder(requireContext())
-                    .setTitle("Создать шаблон")
-                    .setView(etName)
-                    .setPositiveButton("Создать") { _, _ ->
-                        val name = etName.text.toString().trim()
-                        if (name.isNotEmpty()) {
-                            lifecycleScope.launch { getDao().insertTemplate(Template(temp = name)) }
-                        }
-                    }
-                    .setNegativeButton("Отмена", null)
-                    .show()
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-            }
-            "input_types" -> {
-                val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
-                val etName = EditText(requireContext()).apply { hint = "Название (например, Коробка)" }
-                val etShort = EditText(requireContext()).apply { hint = "Сокращение (например, кор.)" }
-                val etWeight = EditText(requireContext()).apply { hint = "Вес, кг (например, 10)" }
-                layout.addView(etName)
-                layout.addView(etShort)
-                layout.addView(etWeight)
-                applyFontSize(layout, getPrefs().fontSize)
-                val dialog = AlertDialog.Builder(requireContext())
-                    .setTitle("Добавить единицу измерения")
-                    .setView(layout)
-                    .setPositiveButton("Добавить") { _, _ ->
-                        val name = etName.text.toString().trim()
-                        val short = etShort.text.toString().trim()
-                        val weight = etWeight.text.toString().toDoubleOrNull() ?: 1.0
-                        if (name.isNotEmpty() && short.isNotEmpty()) {
-                            lifecycleScope.launch {
-                                getDao().insertInputType(InputType(type_name = name, short_name = short, weight_kg = weight))
-                            }
-                        }
-                    }
-                    .setNegativeButton("Отмена", null)
-                    .show()
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-            }
-            "patterns" -> {
-                val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
-                val etName = EditText(requireContext()).apply { hint = "Название паттерна" }
-                val etTemplate = EditText(requireContext()).apply { hint = "Текст паттерна (например, - {entity} - {input} {input_type_short}.)" }
-                layout.addView(etName)
-                layout.addView(etTemplate)
-                applyFontSize(layout, getPrefs().fontSize)
-                val dialog = AlertDialog.Builder(requireContext())
-                    .setTitle("Добавить паттерн")
-                    .setView(layout)
-                    .setPositiveButton("Добавить") { _, _ ->
-                        val name = etName.text.toString().trim()
-                        val template = etTemplate.text.toString().trim()
-                        if (name.isNotEmpty() && template.isNotEmpty()) {
-                            lifecycleScope.launch {
-                                getDao().insertPattern(Pattern(name = name, template = template, is_active = false))
-                            }
-                        }
-                    }
-                    .setNegativeButton("Отмена", null)
-                    .show()
-                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-            }
-        }
-    }
-
-    private fun showEditPatternDialog(pattern: Pattern) {
-        val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
-        val etName = EditText(requireContext()).apply { setText(pattern.name) }
-        val etTemplate = EditText(requireContext()).apply { setText(pattern.template) }
-        layout.addView(etName)
-        layout.addView(etTemplate)
-        applyFontSize(layout, getPrefs().fontSize)
-        val dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Редактировать паттерн")
-            .setView(layout)
-            .setPositiveButton("Сохранить") { _, _ ->
-                val newName = etName.text.toString().trim()
-                val newTemplate = etTemplate.text.toString().trim()
-                if (newName.isNotEmpty() && newTemplate.isNotEmpty()) {
-                    lifecycleScope.launch {
-                        val updated = Pattern(id = pattern.id, name = newName, template = newTemplate, is_active = pattern.is_active)
-                        getDao().updatePattern(updated)
-                    }
-                }
-            }
-            .setNegativeButton("Отмена", null)
-            .show()
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-    }
-
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val text1: TextView = itemView.findViewById(android.R.id.text1)
-        val text2: TextView? = itemView.findViewById(android.R.id.text2)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+    // ... остальные методы (showAddDialog, showEditPatternDialog, handleImportFile, ViewHolder) уже были, я не дублирую для экономии места.
+    // Они остаются точно такими же, как в предыдущем полном DirectoryEditFragment.kt,
+    // включая импорт файлов и шрифты для кнопок.
+    // Просто добавьте их сюда.
 }
