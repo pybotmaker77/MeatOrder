@@ -7,8 +7,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.meatorder.data.entity.MeatEntity
 import com.example.meatorder.databinding.ItemRemainsBinding
+import com.example.meatorder.utils.applyFontSize
+import com.example.meatorder.utils.getPrefs
 
 class RemainsAdapter(
+    private val fragment: androidx.fragment.app.Fragment,
     private val items: List<MeatEntity>,
     private val onQuantityChanged: (Int, Int) -> Unit
 ) : RecyclerView.Adapter<RemainsAdapter.ViewHolder>() {
@@ -19,6 +22,8 @@ class RemainsAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemRemainsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        // Применяем текущий размер шрифта к строке
+        applyFontSize(binding.root, fragment.getPrefs().fontSize)
         return ViewHolder(binding)
     }
 
@@ -35,14 +40,12 @@ class RemainsAdapter(
             binding.tvEntity.text = entity.entity
             binding.etQuantity.setText(currentQty?.toString() ?: "")
 
-            // При фокусе убираем 0
             binding.etQuantity.setOnFocusChangeListener { _, hasFocus ->
                 if (hasFocus && binding.etQuantity.text.toString() == "0") {
                     binding.etQuantity.setText("")
                 }
             }
 
-            // TextWatcher для автоудаления нуля
             binding.etQuantity.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -54,7 +57,6 @@ class RemainsAdapter(
                 }
             })
 
-            // Сохранение введённого значения
             binding.etQuantity.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     val qty = binding.etQuantity.text.toString().toIntOrNull() ?: 0
