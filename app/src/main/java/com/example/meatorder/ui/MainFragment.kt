@@ -27,7 +27,6 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val prefs = getPrefs()
-        // Применяем размер шрифта ко всем элементам экрана
         applyFontSize(binding.root, prefs.fontSize)
 
         binding.btnOrder.setOnClickListener {
