@@ -3,9 +3,11 @@ package com.example.meatorder.utils
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
@@ -71,13 +73,12 @@ fun parseTemplatesJson(json: String): List<ImportTemplate> {
     return Gson().fromJson(json, type)
 }
 
-// Функция применения размера шрифта ко всем View в иерархии
 fun applyFontSize(view: View, fontSize: Int, headerSize: Int = fontSize + 5) {
     if (view is TextView) {
-        view.textSize = fontSize.toFloat()
+        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize.toFloat())
     }
     if (view is Toolbar) {
-        view.titleTextSize = headerSize.toFloat()
+        view.setTitleTextSize(TypedValue.COMPLEX_UNIT_SP, headerSize.toFloat())
     }
     if (view is ViewGroup) {
         for (i in 0 until view.childCount) {
