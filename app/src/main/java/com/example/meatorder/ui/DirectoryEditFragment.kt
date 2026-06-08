@@ -130,6 +130,7 @@ class DirectoryEditFragment : Fragment() {
                 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
                     val itemView = LayoutInflater.from(parent.context)
                         .inflate(android.R.layout.simple_list_item_2, parent, false)
+                    applyFontSize(itemView, getPrefs().fontSize)
                     return ViewHolder(itemView)
                 }
                 override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -140,9 +141,7 @@ class DirectoryEditFragment : Fragment() {
                         AlertDialog.Builder(requireContext())
                             .setTitle("Удалить")
                             .setMessage("Удалить \"${entity.entity}\"?")
-                            .setPositiveButton("Да") { _, _ ->
-                                lifecycleScope.launch { dao.deleteEntity(entity) }
-                            }
+                            .setPositiveButton("Да") { _, _ -> lifecycleScope.launch { dao.deleteEntity(entity) } }
                             .setNegativeButton("Нет", null)
                             .show()
                         true
@@ -160,6 +159,7 @@ class DirectoryEditFragment : Fragment() {
                 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
                     val itemView = LayoutInflater.from(parent.context)
                         .inflate(android.R.layout.simple_list_item_1, parent, false)
+                    applyFontSize(itemView, getPrefs().fontSize)
                     return ViewHolder(itemView)
                 }
                 override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -185,6 +185,7 @@ class DirectoryEditFragment : Fragment() {
                 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
                     val itemView = LayoutInflater.from(parent.context)
                         .inflate(android.R.layout.simple_list_item_2, parent, false)
+                    applyFontSize(itemView, getPrefs().fontSize)
                     return ViewHolder(itemView)
                 }
                 override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -204,6 +205,7 @@ class DirectoryEditFragment : Fragment() {
                 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
                     val itemView = LayoutInflater.from(parent.context)
                         .inflate(android.R.layout.simple_list_item_1, parent, false)
+                    applyFontSize(itemView, getPrefs().fontSize)
                     return ViewHolder(itemView)
                 }
                 override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -217,9 +219,7 @@ class DirectoryEditFragment : Fragment() {
                             AlertDialog.Builder(requireContext())
                                 .setTitle("Удалить паттерн")
                                 .setMessage("Удалить \"${pattern.name}\"?")
-                                .setPositiveButton("Да") { _, _ ->
-                                    lifecycleScope.launch { dao.deletePattern(pattern) }
-                                }
+                                .setPositiveButton("Да") { _, _ -> lifecycleScope.launch { dao.deletePattern(pattern) } }
                                 .setNegativeButton("Нет", null)
                                 .show()
                         }
@@ -240,6 +240,7 @@ class DirectoryEditFragment : Fragment() {
                 val etGroup = EditText(requireContext()).apply { hint = "Группа" }
                 layout.addView(etName)
                 layout.addView(etGroup)
+                applyFontSize(layout, getPrefs().fontSize)
                 AlertDialog.Builder(requireContext())
                     .setTitle("Добавить позицию")
                     .setView(layout)
@@ -255,6 +256,7 @@ class DirectoryEditFragment : Fragment() {
             }
             "templates" -> {
                 val etName = EditText(requireContext()).apply { hint = "Название шаблона" }
+                applyFontSize(etName, getPrefs().fontSize)
                 AlertDialog.Builder(requireContext())
                     .setTitle("Создать шаблон")
                     .setView(etName)
@@ -275,6 +277,7 @@ class DirectoryEditFragment : Fragment() {
                 layout.addView(etName)
                 layout.addView(etShort)
                 layout.addView(etWeight)
+                applyFontSize(layout, getPrefs().fontSize)
                 AlertDialog.Builder(requireContext())
                     .setTitle("Добавить единицу измерения")
                     .setView(layout)
@@ -297,6 +300,7 @@ class DirectoryEditFragment : Fragment() {
                 val etTemplate = EditText(requireContext()).apply { hint = "Текст паттерна (например, - {entity} - {input} {input_type_short}.)" }
                 layout.addView(etName)
                 layout.addView(etTemplate)
+                applyFontSize(layout, getPrefs().fontSize)
                 AlertDialog.Builder(requireContext())
                     .setTitle("Добавить паттерн")
                     .setView(layout)
@@ -321,6 +325,7 @@ class DirectoryEditFragment : Fragment() {
         val etTemplate = EditText(requireContext()).apply { setText(pattern.template) }
         layout.addView(etName)
         layout.addView(etTemplate)
+        applyFontSize(layout, getPrefs().fontSize)
         AlertDialog.Builder(requireContext())
             .setTitle("Редактировать паттерн")
             .setView(layout)
