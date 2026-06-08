@@ -1,13 +1,17 @@
-﻿package com.example.meatorder.ui
+package com.example.meatorder.ui
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.meatorder.databinding.ItemOrder3Binding
+import com.example.meatorder.utils.applyFontSize
+import com.example.meatorder.utils.getPrefs
 
 class Order3Adapter(
+    private val fragment: Fragment,
     private val onEditClick: (Order3Item) -> Unit,
     private val onDeleteClick: (Order3Item) -> Unit
 ) : ListAdapter<Order3Item, Order3Adapter.ViewHolder>(DiffCallback()) {
@@ -21,6 +25,7 @@ class Order3Adapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemOrder3Binding.inflate(LayoutInflater.from(parent.context), parent, false)
+        applyFontSize(binding.root, fragment.getPrefs().fontSize)
         return ViewHolder(binding)
     }
 
