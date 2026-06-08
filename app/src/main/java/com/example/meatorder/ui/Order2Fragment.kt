@@ -115,6 +115,8 @@ class Order2Fragment : Fragment() {
 
     private fun showSelectFormDialog(item: Order2Item, position: Int) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_select_form, null)
+        applyFontSize(dialogView, getPrefs().fontSize)
+
         val rgTypes = dialogView.findViewById<RadioGroup>(R.id.rgTypes)
         val etQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
 
