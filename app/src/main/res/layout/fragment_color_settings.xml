@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    android:padding="16dp">
 
     <include
         android:id="@+id/header"
@@ -13,17 +14,31 @@
         android:layout_height="wrap_content" />
 
     <TextView
+        android:id="@+id/tvCurrentColor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Нажмите на экран для смены цвета хедера\n(Чёрный → Красный → Синий)"
+        android:text="Текущий цвет хедера: чёрный"
         android:textSize="16sp"
-        android:gravity="center"
-        android:layout_margin="16dp" />
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/btnPickColor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Выбрать цвет хедера"
+        android:layout_marginTop="8dp" />
 
     <Button
         android:id="@+id/btnPickImage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Выбрать фоновое изображение"
-        android:layout_gravity="center" />
+        android:layout_marginTop="8dp" />
+
+    <Button
+        android:id="@+id/btnResetColors"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Сбросить настройки цвета"
+        android:layout_marginTop="8dp" />
 </LinearLayout>
