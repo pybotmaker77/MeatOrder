@@ -3,8 +3,11 @@ package com.example.meatorder.utils
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
 import androidx.activity.result.ActivityResultLauncher
+import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.example.meatorder.MeatOrderApp
 import com.google.gson.Gson
@@ -45,7 +48,6 @@ fun readTextFromUri(uri: Uri, activity: Activity): String {
 fun parseEntitiesCsv(text: String): List<Pair<String, String>> {
     val lines = text.lines().filter { it.isNotBlank() }
     if (lines.isEmpty()) return emptyList()
-    // первая строка — заголовок, пропускаем
     return lines.drop(1).map { line ->
         val parts = line.split(";")
         if (parts.size >= 2) Pair(parts[0].trim(), parts[1].trim())
@@ -67,4 +69,19 @@ data class ImportTemplateItem(
 fun parseTemplatesJson(json: String): List<ImportTemplate> {
     val type = object : TypeToken<List<ImportTemplate>>() {}.type
     return Gson().fromJson(json, type)
+}
+
+// Функция применения размера шрифта ко всем View в иерархии
+fun applyFontSize(view: View, fontSize: Int, headerSize: Int = fontSize + 5) {
+    if (view is TextView) {
+        view.textSize = fontSize.toFloat()
+    }
+    if (view is Toolbar) {
+        view.titleTextSize = headerSize.toFloat()
+    }
+    if (view is ViewGroup) {
+        for (i in 0 until view.childCount) {
+            applyFontSize(view.getChildAt(i), fontSize, headerSize)
+        }
+    }
 }
