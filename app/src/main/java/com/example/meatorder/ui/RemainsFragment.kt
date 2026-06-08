@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentRemainsBinding
 import com.example.meatorder.utils.getDao
@@ -38,6 +39,21 @@ class RemainsFragment : Fragment() {
             dao.getAllEntities().collect { entities ->
                 val adapter = RemainsAdapter(entities) { _, _ -> }
                 binding.recyclerRemains.layoutManager = LinearLayoutManager(requireContext())
+
+                // Добавляем тонкий разделитель между строками
+                binding.recyclerRemains.addItemDecoration(
+                    object : RecyclerView.ItemDecoration() {
+                        override fun getItemOffsets(
+                            outRect: android.graphics.Rect,
+                            view: View,
+                            parent: RecyclerView,
+                            state: RecyclerView.State
+                        ) {
+                            outRect.bottom = 1
+                        }
+                    }
+                )
+
                 binding.recyclerRemains.adapter = adapter
 
                 binding.fabContinue.setOnClickListener {
