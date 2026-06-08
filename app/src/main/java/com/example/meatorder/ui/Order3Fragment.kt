@@ -99,7 +99,6 @@ class Order3Fragment : Fragment() {
             ItemTouchHelper(swipeHandler).attachToRecyclerView(binding.recyclerOrder3)
 
             updateSummary()
-            // Применяем шрифт к сводке
             applyFontSize(binding.layoutSummary, getPrefs().fontSize)
 
             binding.fabContinue.setOnClickListener {
@@ -150,6 +149,8 @@ class Order3Fragment : Fragment() {
 
     private fun showEditDialog(item: Order3Item) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_select_form, null)
+        applyFontSize(dialogView, getPrefs().fontSize)
+
         val rg = dialogView.findViewById<RadioGroup>(R.id.rgTypes)
         val etQty = dialogView.findViewById<EditText>(R.id.etQuantity)
 
