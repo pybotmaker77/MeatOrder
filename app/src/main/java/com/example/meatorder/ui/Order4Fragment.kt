@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentOrder4Binding
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
 import com.google.gson.Gson
@@ -35,12 +36,12 @@ class Order4Fragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        applyFontSize(binding.root, getPrefs().fontSize)
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
-        
+        applyFontSize(binding.root, getPrefs().fontSize)
+
         val json = arguments?.getString("finalItemsJson") ?: return
         val type = object : TypeToken<List<Map<String, Any>>>() {}.type
         val items: List<Map<String, Any>> = Gson().fromJson(json, type)
