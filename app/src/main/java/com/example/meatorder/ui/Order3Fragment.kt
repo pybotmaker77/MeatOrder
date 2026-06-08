@@ -149,8 +149,6 @@ class Order3Fragment : Fragment() {
 
     private fun showEditDialog(item: Order3Item) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_select_form, null)
-        applyFontSize(dialogView, getPrefs().fontSize)
-
         val rg = dialogView.findViewById<RadioGroup>(R.id.rgTypes)
         val etQty = dialogView.findViewById<EditText>(R.id.etQuantity)
 
@@ -163,7 +161,9 @@ class Order3Fragment : Fragment() {
         if (index >= 0) (rg.getChildAt(index) as RadioButton).isChecked = true
         etQty.setText(item.quantity.toString())
 
-        AlertDialog.Builder(requireContext())
+        applyFontSize(dialogView, getPrefs().fontSize) // после добавления RadioButton
+
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Редактировать")
             .setView(dialogView)
             .setPositiveButton("Выбрать") { _, _ ->
@@ -184,6 +184,9 @@ class Order3Fragment : Fragment() {
             }
             .setNegativeButton("Отмена", null)
             .show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
     private fun saveDraft() {
