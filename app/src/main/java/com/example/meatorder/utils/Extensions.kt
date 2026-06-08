@@ -6,7 +6,6 @@ import android.net.Uri
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -83,18 +82,6 @@ fun applyFontSize(view: View, fontSize: Int, headerSize: Int = fontSize + 5) {
             val child = view.getChildAt(i)
             if (child is TextView) {
                 child.setTextSize(TypedValue.COMPLEX_UNIT_SP, headerSize.toFloat())
-            }
-        }
-    }
-    if (view is Spinner) {
-        // Применяем шрифт к выбранному элементу и к выпадающему списку
-        view.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        (view.adapter as? android.widget.ArrayAdapter<*>)?.let { adapter ->
-            for (i in 0 until adapter.count) {
-                val dropDownView = adapter.getDropDownView(i, null, view)
-                if (dropDownView is TextView) {
-                    dropDownView.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize.toFloat())
-                }
             }
         }
     }
