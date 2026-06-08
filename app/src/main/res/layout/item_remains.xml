@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="8dp"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:background="@android:color/white">
 
     <TextView
         android:id="@+id/tvEntity"
@@ -20,4 +21,10 @@
         android:inputType="number"
         android:maxLength="6"
         android:hint="0" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginTop="4dp" />
 </LinearLayout>
