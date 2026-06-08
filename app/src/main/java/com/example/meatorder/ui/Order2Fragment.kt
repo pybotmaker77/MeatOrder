@@ -16,6 +16,7 @@ import com.example.meatorder.R
 import com.example.meatorder.data.entity.InputType
 import com.example.meatorder.data.entity.TemplateItem
 import com.example.meatorder.databinding.FragmentOrder2Binding
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
 import com.example.meatorder.utils.showToast
@@ -40,11 +41,11 @@ class Order2Fragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        applyFontSize(binding.root, getPrefs().fontSize)
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        applyFontSize(binding.root, getPrefs().fontSize)
 
         val dao = getDao()
         val args = arguments
@@ -145,7 +146,6 @@ class Order2Fragment : Fragment() {
                 }
             }
             .setNegativeButton("Отмена") { _, _ ->
-                // Снимаем чекбокс и очищаем данные
                 item.selected = false
                 item.inputType = null
                 item.quantity = 0
