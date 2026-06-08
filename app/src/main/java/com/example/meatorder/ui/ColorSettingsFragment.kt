@@ -8,10 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentColorSettingsBinding
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getPrefs
 
 class ColorSettingsFragment : Fragment() {
@@ -37,15 +39,13 @@ class ColorSettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        applyFontSize(binding.root, getPrefs().fontSize)
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
-        header?.setBackgroundColor(getPrefs().headerColor)
-        
+        applyFontSize(binding.root, getPrefs().fontSize)
+
         val prefs = getPrefs()
 
-        // Смена цвета хедера с немедленным применением
         binding.colorSettingsRoot.setOnClickListener {
             val current = prefs.headerColor
             val newColor = when (current) {
@@ -54,7 +54,6 @@ class ColorSettingsFragment : Fragment() {
                 else -> Color.BLACK
             }
             prefs.headerColor = newColor
-            // Перезапускаем Activity, чтобы изменения вступили в силу
             requireActivity().recreate()
         }
 
@@ -65,6 +64,25 @@ class ColorSettingsFragment : Fragment() {
             }
             pickImageLauncher.launch(intent)
         }
+
+        val resetButton = android.widget.Button(requireContext()).apply {
+            text = "Сбросить настройки цвета"
+            setOnClickListener {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Сбросить настройки?")
+                    .setMessage("Вернуть цвета хедера, футера и фона к значениям по умолчанию?")
+                    .setPositiveButton("Да") { _, _ ->
+                        prefs.headerColor = Color.BLACK
+                        prefs.footerColor = Color.WHITE
+                        prefs.bodyColor = Color.WHITE
+                        prefs.backgroundImagePath = null
+                        requireActivity().recreate()
+                    }
+                    .setNegativeButton("Нет", null)
+                    .show()
+            }
+        }
+        (binding.root as? android.widget.LinearLayout)?.addView(resetButton)
     }
 
     override fun onDestroyView() {
