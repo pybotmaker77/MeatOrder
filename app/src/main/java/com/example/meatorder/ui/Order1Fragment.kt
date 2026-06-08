@@ -1,11 +1,11 @@
 package com.example.meatorder.ui
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
@@ -73,7 +73,7 @@ class Order1Fragment : Fragment() {
         }
         val names = templates.map { it.temp }.toTypedArray()
         val checked = BooleanArray(templates.size) { false }
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Выберите шаблоны")
             .setMultiChoiceItems(names, checked) { _, index, isChecked ->
                 checked[index] = isChecked
@@ -89,6 +89,11 @@ class Order1Fragment : Fragment() {
             }
             .setNegativeButton("Отмена", null)
             .show()
+
+        // Применяем шрифт ко всем элементам диалога
+        applyFontSize(dialog.window?.decorView ?: return, getPrefs().fontSize)
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
     override fun onDestroyView() {
