@@ -115,11 +115,10 @@ class Order2Fragment : Fragment() {
 
     private fun showSelectFormDialog(item: Order2Item, position: Int) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_select_form, null)
-        applyFontSize(dialogView, getPrefs().fontSize)
-
         val rgTypes = dialogView.findViewById<RadioGroup>(R.id.rgTypes)
         val etQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
 
+        // Сначала добавляем RadioButton, потом применяем шрифт
         for (type in inputTypes) {
             val rb = RadioButton(requireContext())
             rb.text = type.type_name
@@ -133,7 +132,9 @@ class Order2Fragment : Fragment() {
         }
         etQuantity.setText(item.quantity.toString())
 
-        AlertDialog.Builder(requireContext())
+        applyFontSize(dialogView, getPrefs().fontSize) // теперь RadioButton уже добавлены
+
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Выберите форму")
             .setView(dialogView)
             .setPositiveButton("Выбрать") { _, _ ->
@@ -154,6 +155,10 @@ class Order2Fragment : Fragment() {
                 adapter.notifyItemChanged(position)
             }
             .show()
+
+        // Шрифт для кнопок
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
     override fun onDestroyView() {
