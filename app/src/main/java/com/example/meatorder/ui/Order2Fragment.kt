@@ -44,7 +44,7 @@ class Order2Fragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
-        
+
         val dao = getDao()
         val args = arguments
         val byBalance = args?.getBoolean("byBalance", false) ?: false
@@ -78,7 +78,9 @@ class Order2Fragment : Fragment() {
                 }
             }
             allItems = list
-            adapter = Order2Adapter({ item, position -> showSelectFormDialog(item, position) }, inputTypes)
+            adapter = Order2Adapter({ item, position ->
+                showSelectFormDialog(item, position)
+            }, inputTypes)
             binding.recyclerOrder2.layoutManager = LinearLayoutManager(requireContext())
             binding.recyclerOrder2.adapter = adapter
             adapter.submitList(allItems)
@@ -141,7 +143,13 @@ class Order2Fragment : Fragment() {
                     adapter.notifyItemChanged(position)
                 }
             }
-            .setNegativeButton("Отмена", null)
+            .setNegativeButton("Отмена") { _, _ ->
+                // Снимаем чекбокс и очищаем данные
+                item.selected = false
+                item.inputType = null
+                item.quantity = 0
+                adapter.notifyItemChanged(position)
+            }
             .show()
     }
 
