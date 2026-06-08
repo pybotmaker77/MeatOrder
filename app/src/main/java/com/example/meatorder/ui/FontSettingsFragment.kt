@@ -31,7 +31,7 @@ class FontSettingsFragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
-        
+
         val prefs = getPrefs()
         var currentSize = prefs.fontSize
         binding.tvCurrentSize.text = "${currentSize}sp"
@@ -42,6 +42,8 @@ class FontSettingsFragment : Fragment() {
             prefs.fontSize = currentSize
             binding.tvCurrentSize.text = "${currentSize}sp"
             binding.tvPreview.textSize = currentSize.toFloat()
+            // Применяем ко всем экранам
+            requireActivity().recreate()
         }
 
         binding.btnMinus.setOnClickListener {
@@ -49,6 +51,7 @@ class FontSettingsFragment : Fragment() {
             prefs.fontSize = currentSize
             binding.tvCurrentSize.text = "${currentSize}sp"
             binding.tvPreview.textSize = currentSize.toFloat()
+            requireActivity().recreate()
         }
 
         lifecycleScope.launch {
