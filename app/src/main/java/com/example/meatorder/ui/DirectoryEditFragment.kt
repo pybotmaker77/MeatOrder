@@ -154,7 +154,6 @@ class DirectoryEditFragment : Fragment() {
                         else -> {
                             val itemView = LayoutInflater.from(parent.context)
                                 .inflate(android.R.layout.simple_list_item_2, parent, false)
-                            // Кнопку добавим в onBindViewHolder, а здесь просто создадим ViewHolder
                             object : RecyclerView.ViewHolder(itemView) {}
                         }
                     }
@@ -173,12 +172,12 @@ class DirectoryEditFragment : Fragment() {
                             text1?.text = entity.entity
                             text2?.text = "Группа: ${entity.group}"
 
-                            // Удаляем старую кнопку (если есть) и добавляем новую
-                            val oldButton = holder.itemView.findViewById<Button>(R.id.btnEdit)
+                            // Удаляем старые кнопки (если есть) по тегу
+                            val oldButton = holder.itemView.findViewWithTag<Button>("edit_button")
                             oldButton?.let { (holder.itemView as ViewGroup).removeView(it) }
 
                             val button = Button(holder.itemView.context).apply {
-                                id = R.id.btnEdit
+                                tag = "edit_button"
                                 text = "Ред."
                                 setOnClickListener {
                                     showEditEntityDialog(entity)
@@ -248,12 +247,11 @@ class DirectoryEditFragment : Fragment() {
                     val text1 = holder.itemView.findViewById<TextView>(android.R.id.text1)
                     text1?.text = template.temp
 
-                    // Удаляем старую кнопку, добавляем новую
-                    val oldButton = holder.itemView.findViewById<Button>(R.id.btnEdit)
+                    val oldButton = holder.itemView.findViewWithTag<Button>("edit_button")
                     oldButton?.let { (holder.itemView as ViewGroup).removeView(it) }
 
                     val button = Button(holder.itemView.context).apply {
-                        id = R.id.btnEdit
+                        tag = "edit_button"
                         text = "Ред."
                         setOnClickListener { showEditTemplateDialog(template) }
                     }
@@ -312,11 +310,11 @@ class DirectoryEditFragment : Fragment() {
                     text1?.text = type.type_name
                     text2?.text = "Сокр.: ${type.short_name}, Вес: ${type.weight_kg} кг"
 
-                    val oldButton = holder.itemView.findViewById<Button>(R.id.btnEdit)
+                    val oldButton = holder.itemView.findViewWithTag<Button>("edit_button")
                     oldButton?.let { (holder.itemView as ViewGroup).removeView(it) }
 
                     val button = Button(holder.itemView.context).apply {
-                        id = R.id.btnEdit
+                        tag = "edit_button"
                         text = "Ред."
                         setOnClickListener { showEditInputTypeDialog(type) }
                     }
