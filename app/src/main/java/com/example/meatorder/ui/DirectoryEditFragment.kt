@@ -120,13 +120,13 @@ class DirectoryEditFragment : Fragment() {
         }
     }
 
-    // --- Номенклатура с группировкой и кнопкой "Ред." ---
+    // ========== Номенклатура с группировкой и кнопкой "Ред." ==========
     private suspend fun setupEntities(dao: AppDao) {
         dao.getAllEntities().collectLatest { entities ->
             val grouped = entities.groupBy { it.group }
-            val flatList = mutableListOf<Any>() // либо Entity, либо String (заголовок группы)
+            val flatList = mutableListOf<Any>()
             for ((group, list) in grouped) {
-                flatList.add(group) // заголовок
+                flatList.add(group)
                 flatList.addAll(list)
             }
 
@@ -154,7 +154,6 @@ class DirectoryEditFragment : Fragment() {
                         else -> {
                             val itemView = LayoutInflater.from(parent.context)
                                 .inflate(android.R.layout.simple_list_item_2, parent, false)
-                            // Добавляем кнопку "Ред." программно
                             val button = Button(parent.context).apply {
                                 text = "Ред."
                                 setOnClickListener {
@@ -184,7 +183,6 @@ class DirectoryEditFragment : Fragment() {
                             val text2 = holder.itemView.findViewById<TextView>(android.R.id.text2)
                             text1?.text = entity.entity
                             text2?.text = "Группа: ${entity.group}"
-                            // Долгое нажатие — удаление
                             holder.itemView.setOnLongClickListener {
                                 AlertDialog.Builder(requireContext())
                                     .setTitle("Удалить")
@@ -231,7 +229,7 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // --- Шаблоны ---
+    // ========== Шаблоны ==========
     private suspend fun setupTemplates(dao: AppDao) {
         dao.getAllTemplates().collectLatest { templates ->
             adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -291,7 +289,7 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // --- Единицы измерения ---
+    // ========== Единицы измерения ==========
     private suspend fun setupInputTypes(dao: AppDao) {
         dao.getAllInputTypes().collectLatest { inputTypes ->
             adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -354,7 +352,7 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // --- Паттерны (остались без изменений, но тоже можно добавить "Ред." при желании) ---
+    // ========== Паттерны ==========
     private suspend fun setupPatterns(dao: AppDao) {
         dao.getAllPatterns().collectLatest { patterns ->
             adapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -388,8 +386,136 @@ class DirectoryEditFragment : Fragment() {
         }
     }
 
-    // ... остальные методы (showAddDialog, showEditPatternDialog, handleImportFile, ViewHolder) уже были, я не дублирую для экономии места.
-    // Они остаются точно такими же, как в предыдущем полном DirectoryEditFragment.kt,
-    // включая импорт файлов и шрифты для кнопок.
-    // Просто добавьте их сюда.
+    // ========== Диалоги добавления и редактирования паттернов ==========
+    private fun showAddDialog(dict: String) {
+        when (dict) {
+            "entities" -> {
+                val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+                val etName = EditText(requireContext()).apply { hint = "Наименование" }
+                val etGroup = EditText(requireContext()).apply { hint = "Группа" }
+                layout.addView(etName)
+                layout.addView(etGroup)
+                applyFontSize(layout, getPrefs().fontSize)
+                val dialog = AlertDialog.Builder(requireContext())
+                    .setTitle("Добавить позицию")
+                    .setView(layout)
+                    .setPositiveButton("Добавить") { _, _ ->
+                        val name = etName.text.toString().trim()
+                        val group = etGroup.text.toString().trim().ifEmpty { "Без группы" }
+                        if (name.isNotEmpty()) {
+                            lifecycleScope.launch { getDao().insertEntity(MeatEntity(entity = name, group = group)) }
+                        }
+                    }
+                    .setNegativeButton("Отмена", null)
+                    .show()
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+            }
+            "templates" -> {
+                val etName = EditText(requireContext()).apply { hint = "Название шаблона" }
+                applyFontSize(etName, getPrefs().fontSize)
+                val dialog = AlertDialog.Builder(requireContext())
+                    .setTitle("Создать шаблон")
+                    .setView(etName)
+                    .setPositiveButton("Создать") { _, _ ->
+                        val name = etName.text.toString().trim()
+                        if (name.isNotEmpty()) {
+                            lifecycleScope.launch { getDao().insertTemplate(Template(temp = name)) }
+                        }
+                    }
+                    .setNegativeButton("Отмена", null)
+                    .show()
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+            }
+            "input_types" -> {
+                val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+                val etName = EditText(requireContext()).apply { hint = "Название (например, Коробка)" }
+                val etShort = EditText(requireContext()).apply { hint = "Сокращение (например, кор.)" }
+                val etWeight = EditText(requireContext()).apply { hint = "Вес, кг (например, 10)" }
+                layout.addView(etName)
+                layout.addView(etShort)
+                layout.addView(etWeight)
+                applyFontSize(layout, getPrefs().fontSize)
+                val dialog = AlertDialog.Builder(requireContext())
+                    .setTitle("Добавить единицу измерения")
+                    .setView(layout)
+                    .setPositiveButton("Добавить") { _, _ ->
+                        val name = etName.text.toString().trim()
+                        val short = etShort.text.toString().trim()
+                        val weight = etWeight.text.toString().toDoubleOrNull() ?: 1.0
+                        if (name.isNotEmpty() && short.isNotEmpty()) {
+                            lifecycleScope.launch {
+                                getDao().insertInputType(InputType(type_name = name, short_name = short, weight_kg = weight))
+                            }
+                        }
+                    }
+                    .setNegativeButton("Отмена", null)
+                    .show()
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+            }
+            "patterns" -> {
+                val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+                val etName = EditText(requireContext()).apply { hint = "Название паттерна" }
+                val etTemplate = EditText(requireContext()).apply { hint = "Текст паттерна (например, - {entity} - {input} {input_type_short}.)" }
+                layout.addView(etName)
+                layout.addView(etTemplate)
+                applyFontSize(layout, getPrefs().fontSize)
+                val dialog = AlertDialog.Builder(requireContext())
+                    .setTitle("Добавить паттерн")
+                    .setView(layout)
+                    .setPositiveButton("Добавить") { _, _ ->
+                        val name = etName.text.toString().trim()
+                        val template = etTemplate.text.toString().trim()
+                        if (name.isNotEmpty() && template.isNotEmpty()) {
+                            lifecycleScope.launch {
+                                getDao().insertPattern(Pattern(name = name, template = template, is_active = false))
+                            }
+                        }
+                    }
+                    .setNegativeButton("Отмена", null)
+                    .show()
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+            }
+        }
+    }
+
+    private fun showEditPatternDialog(pattern: Pattern) {
+        val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+        val etName = EditText(requireContext()).apply { setText(pattern.name) }
+        val etTemplate = EditText(requireContext()).apply { setText(pattern.template) }
+        layout.addView(etName)
+        layout.addView(etTemplate)
+        applyFontSize(layout, getPrefs().fontSize)
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Редактировать паттерн")
+            .setView(layout)
+            .setPositiveButton("Сохранить") { _, _ ->
+                val newName = etName.text.toString().trim()
+                val newTemplate = etTemplate.text.toString().trim()
+                if (newName.isNotEmpty() && newTemplate.isNotEmpty()) {
+                    lifecycleScope.launch {
+                        val updated = Pattern(id = pattern.id, name = newName, template = newTemplate, is_active = pattern.is_active)
+                        getDao().updatePattern(updated)
+                    }
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+    }
+
+    // ========== Вспомогательный ViewHolder ==========
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val text1: TextView = itemView.findViewById(android.R.id.text1)
+        val text2: TextView? = itemView.findViewById(android.R.id.text2)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
