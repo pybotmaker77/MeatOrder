@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.meatorder.R
 import com.example.meatorder.data.entity.InputType
 import com.example.meatorder.databinding.FragmentOrder3Binding
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
 import com.example.meatorder.utils.showToast
@@ -42,12 +43,12 @@ class Order3Fragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        applyFontSize(binding.root, getPrefs().fontSize)
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
-        
+        applyFontSize(binding.root, getPrefs().fontSize)
+
         val selectedJson = arguments?.getString("selectedItemsJson") ?: return
         val type = object : TypeToken<List<Map<String, Any>>>() {}.type
         val rawList: List<Map<String, Any>> = Gson().fromJson(selectedJson, type)
