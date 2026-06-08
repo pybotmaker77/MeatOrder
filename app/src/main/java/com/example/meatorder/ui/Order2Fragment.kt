@@ -80,7 +80,7 @@ class Order2Fragment : Fragment() {
                 }
             }
             allItems = list
-            adapter = Order2Adapter({ item, position ->
+            adapter = Order2Adapter(this@Order2Fragment, { item, position ->
                 showSelectFormDialog(item, position)
             }, inputTypes)
             binding.recyclerOrder2.layoutManager = LinearLayoutManager(requireContext())
