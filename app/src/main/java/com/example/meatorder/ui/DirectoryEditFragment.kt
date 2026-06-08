@@ -46,6 +46,7 @@ class DirectoryEditFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        applyFontSize(binding.root, getPrefs().fontSize)
 
         dict = arguments?.getString("dict") ?: "entities"
 
