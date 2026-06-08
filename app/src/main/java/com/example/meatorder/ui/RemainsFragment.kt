@@ -39,7 +39,7 @@ class RemainsFragment : Fragment() {
         val dao = getDao()
         lifecycleScope.launch {
             dao.getAllEntities().collect { entities ->
-                val adapter = RemainsAdapter(entities) { _, _ -> }
+                val adapter = RemainsAdapter(this@RemainsFragment, entities) { _, _ -> }
                 binding.recyclerRemains.layoutManager = LinearLayoutManager(requireContext())
                 binding.recyclerRemains.addItemDecoration(
                     object : RecyclerView.ItemDecoration() {
