@@ -60,29 +60,33 @@ class Order2Adapter(
         fun bind(item: Order2Item) {
             binding.tvEntity.text = item.entity?.entity
             binding.checkbox.isChecked = item.selected
+
             if (item.selected && (item.inputType == null || item.quantity == 0)) {
                 binding.root.setBackgroundColor(ContextCompat.getColor(binding.root.context, R.color.yellow_highlight))
             } else {
                 binding.root.setBackgroundColor(ContextCompat.getColor(binding.root.context, android.R.color.white))
             }
 
-            // Клик по всей строке
+            // Обработчик нажатия на всю строку
             binding.root.setOnClickListener {
-                item.selected = !item.selected
-                binding.checkbox.isChecked = item.selected
-                if (item.selected) {
+                if (!item.selected) {
+                    // Если не выбрано – отмечаем и открываем диалог
+                    item.selected = true
+                    binding.checkbox.isChecked = true
                     onEntityClick(item, adapterPosition)
                 } else {
-                    item.inputType = null
-                    item.quantity = 0
-                    notifyItemChanged(adapterPosition)
+                    // Уже выбрано – просто открываем диалог (для редактирования)
+                    onEntityClick(item, adapterPosition)
                 }
             }
 
-            if (item.inputType != null) {
+            // Показываем сводку, если заполнено
+            if (item.inputType != null && item.quantity > 0) {
                 binding.tvSummary.text = "${item.quantity} ${item.inputType!!.short_name}"
                 binding.tvSummary.visibility = View.VISIBLE
-            } else binding.tvSummary.visibility = View.GONE
+            } else {
+                binding.tvSummary.visibility = View.GONE
+            }
         }
     }
 }
