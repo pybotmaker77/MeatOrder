@@ -62,7 +62,6 @@ class TemplateEditFragment : Fragment() {
         lifecycleScope.launch {
             entities = dao.getAllEntities().first()
             inputTypes = dao.getAllInputTypes().first()
-
             dao.getTemplateItems(templateId).collectLatest { items ->
                 updateList(items)
             }
@@ -76,6 +75,8 @@ class TemplateEditFragment : Fragment() {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
                 val itemView = LayoutInflater.from(parent.context)
                     .inflate(android.R.layout.simple_list_item_2, parent, false)
+                // Применяем шрифт к каждой строке
+                applyFontSize(itemView, getPrefs().fontSize)
                 return ViewHolder(itemView)
             }
             override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -88,9 +89,7 @@ class TemplateEditFragment : Fragment() {
                         .setTitle("Удалить элемент")
                         .setMessage("Удалить \"${entity?.entity}\" из шаблона?")
                         .setPositiveButton("Да") { _, _ ->
-                            lifecycleScope.launch {
-                                getDao().deleteTemplateItem(item)
-                            }
+                            lifecycleScope.launch { getDao().deleteTemplateItem(item) }
                         }
                         .setNegativeButton("Нет", null)
                         .show()
@@ -122,8 +121,9 @@ class TemplateEditFragment : Fragment() {
         layout.addView(spinnerEntity)
         layout.addView(spinnerType)
         layout.addView(etQuantity)
+        applyFontSize(layout, getPrefs().fontSize)
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Добавить позицию в шаблон")
             .setView(layout)
             .setPositiveButton("Добавить") { _, _ ->
@@ -147,6 +147,10 @@ class TemplateEditFragment : Fragment() {
             }
             .setNegativeButton("Отмена", null)
             .show()
+
+        // Применяем шрифт к кнопкам диалога
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
