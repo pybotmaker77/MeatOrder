@@ -18,6 +18,9 @@ interface AppDao {
     @Insert
     suspend fun insertEntity(entity: MeatEntity)
 
+    @Update
+    suspend fun updateEntity(entity: MeatEntity)
+
     @Delete
     suspend fun deleteEntity(entity: MeatEntity)
 
@@ -29,6 +32,9 @@ interface AppDao {
 
     @Insert
     suspend fun insertTemplate(template: Template): Long
+
+    @Update
+    suspend fun updateTemplate(template: Template)
 
     @Delete
     suspend fun deleteTemplate(template: Template)
