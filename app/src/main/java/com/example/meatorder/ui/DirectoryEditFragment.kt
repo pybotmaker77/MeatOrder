@@ -241,7 +241,7 @@ class DirectoryEditFragment : Fragment() {
                 layout.addView(etName)
                 layout.addView(etGroup)
                 applyFontSize(layout, getPrefs().fontSize)
-                AlertDialog.Builder(requireContext())
+                val dialog = AlertDialog.Builder(requireContext())
                     .setTitle("Добавить позицию")
                     .setView(layout)
                     .setPositiveButton("Добавить") { _, _ ->
@@ -253,11 +253,13 @@ class DirectoryEditFragment : Fragment() {
                     }
                     .setNegativeButton("Отмена", null)
                     .show()
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
             }
             "templates" -> {
                 val etName = EditText(requireContext()).apply { hint = "Название шаблона" }
                 applyFontSize(etName, getPrefs().fontSize)
-                AlertDialog.Builder(requireContext())
+                val dialog = AlertDialog.Builder(requireContext())
                     .setTitle("Создать шаблон")
                     .setView(etName)
                     .setPositiveButton("Создать") { _, _ ->
@@ -268,6 +270,8 @@ class DirectoryEditFragment : Fragment() {
                     }
                     .setNegativeButton("Отмена", null)
                     .show()
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
             }
             "input_types" -> {
                 val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
@@ -278,7 +282,7 @@ class DirectoryEditFragment : Fragment() {
                 layout.addView(etShort)
                 layout.addView(etWeight)
                 applyFontSize(layout, getPrefs().fontSize)
-                AlertDialog.Builder(requireContext())
+                val dialog = AlertDialog.Builder(requireContext())
                     .setTitle("Добавить единицу измерения")
                     .setView(layout)
                     .setPositiveButton("Добавить") { _, _ ->
@@ -293,6 +297,8 @@ class DirectoryEditFragment : Fragment() {
                     }
                     .setNegativeButton("Отмена", null)
                     .show()
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
             }
             "patterns" -> {
                 val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
@@ -301,7 +307,7 @@ class DirectoryEditFragment : Fragment() {
                 layout.addView(etName)
                 layout.addView(etTemplate)
                 applyFontSize(layout, getPrefs().fontSize)
-                AlertDialog.Builder(requireContext())
+                val dialog = AlertDialog.Builder(requireContext())
                     .setTitle("Добавить паттерн")
                     .setView(layout)
                     .setPositiveButton("Добавить") { _, _ ->
@@ -315,6 +321,8 @@ class DirectoryEditFragment : Fragment() {
                     }
                     .setNegativeButton("Отмена", null)
                     .show()
+                dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+                dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
             }
         }
     }
@@ -326,7 +334,7 @@ class DirectoryEditFragment : Fragment() {
         layout.addView(etName)
         layout.addView(etTemplate)
         applyFontSize(layout, getPrefs().fontSize)
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Редактировать паттерн")
             .setView(layout)
             .setPositiveButton("Сохранить") { _, _ ->
@@ -341,6 +349,8 @@ class DirectoryEditFragment : Fragment() {
             }
             .setNegativeButton("Отмена", null)
             .show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
