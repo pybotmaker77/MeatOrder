@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentRemainsBinding
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
 import kotlinx.coroutines.launch
@@ -29,19 +30,17 @@ class RemainsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        applyFontSize(binding.root, getPrefs().fontSize)
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        applyFontSize(binding.root, getPrefs().fontSize)
 
         val dao = getDao()
         lifecycleScope.launch {
             dao.getAllEntities().collect { entities ->
                 val adapter = RemainsAdapter(entities) { _, _ -> }
                 binding.recyclerRemains.layoutManager = LinearLayoutManager(requireContext())
-
-                // Добавляем тонкий разделитель между строками
                 binding.recyclerRemains.addItemDecoration(
                     object : RecyclerView.ItemDecoration() {
                         override fun getItemOffsets(
@@ -54,7 +53,6 @@ class RemainsFragment : Fragment() {
                         }
                     }
                 )
-
                 binding.recyclerRemains.adapter = adapter
 
                 binding.fabContinue.setOnClickListener {
@@ -62,7 +60,6 @@ class RemainsFragment : Fragment() {
                     val emptyEntities = entities.filter {
                         it.id !in quantities.keys || quantities[it.id] == 0
                     }.map { it.id }.toIntArray()
-
                     val bundle = Bundle().apply {
                         putBoolean("byBalance", true)
                         putIntArray("templateIds", intArrayOf())
