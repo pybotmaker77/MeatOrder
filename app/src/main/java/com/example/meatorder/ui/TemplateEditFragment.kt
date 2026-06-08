@@ -45,6 +45,7 @@ class TemplateEditFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        applyFontSize(binding.root, getPrefs().fontSize)
 
         templateId = arguments?.getInt("templateId", -1) ?: -1
         templateName = arguments?.getString("templateName", "") ?: ""
