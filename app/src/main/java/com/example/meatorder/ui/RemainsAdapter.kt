@@ -1,5 +1,7 @@
-﻿package com.example.meatorder.ui
+package com.example.meatorder.ui
 
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -32,6 +34,27 @@ class RemainsAdapter(
         fun bind(entity: MeatEntity, currentQty: Int?) {
             binding.tvEntity.text = entity.entity
             binding.etQuantity.setText(currentQty?.toString() ?: "")
+
+            // При фокусе убираем 0
+            binding.etQuantity.setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus && binding.etQuantity.text.toString() == "0") {
+                    binding.etQuantity.setText("")
+                }
+            }
+
+            // TextWatcher для автоудаления нуля
+            binding.etQuantity.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+                override fun afterTextChanged(s: Editable?) {
+                    if (s.isNullOrEmpty()) return
+                    if (s.toString() == "0" && s.length == 1 && binding.etQuantity.hasFocus()) {
+                        binding.etQuantity.setText("")
+                    }
+                }
+            })
+
+            // Сохранение введённого значения
             binding.etQuantity.setOnFocusChangeListener { _, hasFocus ->
                 if (!hasFocus) {
                     val qty = binding.etQuantity.text.toString().toIntOrNull() ?: 0
