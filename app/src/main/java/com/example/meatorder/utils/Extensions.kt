@@ -78,7 +78,13 @@ fun applyFontSize(view: View, fontSize: Int, headerSize: Int = fontSize + 5) {
         view.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize.toFloat())
     }
     if (view is Toolbar) {
-        view.setTitleTextSize(TypedValue.COMPLEX_UNIT_SP, headerSize.toFloat())
+        // Ищем TextView заголовка внутри Toolbar и задаём размер
+        for (i in 0 until view.childCount) {
+            val child = view.getChildAt(i)
+            if (child is TextView) {
+                child.setTextSize(TypedValue.COMPLEX_UNIT_SP, headerSize.toFloat())
+            }
+        }
     }
     if (view is ViewGroup) {
         for (i in 0 until view.childCount) {
