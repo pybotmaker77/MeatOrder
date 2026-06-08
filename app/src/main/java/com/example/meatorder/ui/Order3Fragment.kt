@@ -74,7 +74,7 @@ class Order3Fragment : Fragment() {
                 .thenByDescending { it.quantity }
                 .thenBy { it.entity })
 
-            adapter = Order3Adapter(
+            adapter = Order3Adapter(this@Order3Fragment,
                 onEditClick = { item -> showEditDialog(item) },
                 onDeleteClick = { item -> deleteItem(item) }
             )
@@ -99,6 +99,8 @@ class Order3Fragment : Fragment() {
             ItemTouchHelper(swipeHandler).attachToRecyclerView(binding.recyclerOrder3)
 
             updateSummary()
+            // Применяем шрифт к сводке
+            applyFontSize(binding.layoutSummary, getPrefs().fontSize)
 
             binding.fabContinue.setOnClickListener {
                 if (items.isEmpty()) {
@@ -139,6 +141,7 @@ class Order3Fragment : Fragment() {
                 items.remove(item)
                 adapter.submitList(items.toList())
                 updateSummary()
+                applyFontSize(binding.layoutSummary, getPrefs().fontSize)
                 saveDraft()
             }
             .setNegativeButton("Нет", null)
@@ -173,6 +176,7 @@ class Order3Fragment : Fragment() {
                         items[pos] = items[pos].copy(inputType = newType, quantity = newQty)
                         adapter.notifyItemChanged(pos)
                         updateSummary()
+                        applyFontSize(binding.layoutSummary, getPrefs().fontSize)
                         saveDraft()
                     }
                 }
