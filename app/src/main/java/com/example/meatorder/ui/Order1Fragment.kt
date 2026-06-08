@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.data.entity.Template
 import com.example.meatorder.databinding.FragmentOrder1Binding
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
 import kotlinx.coroutines.CoroutineScope
@@ -33,11 +34,11 @@ class Order1Fragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        applyFontSize(binding.root, getPrefs().fontSize)
 
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        applyFontSize(binding.root, getPrefs().fontSize)
 
         binding.btnBalance.setOnClickListener {
             findNavController().navigate(R.id.action_order1Fragment_to_remainsFragment)
