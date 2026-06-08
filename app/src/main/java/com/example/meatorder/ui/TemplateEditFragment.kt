@@ -21,6 +21,7 @@ import com.example.meatorder.data.entity.InputType
 import com.example.meatorder.data.entity.MeatEntity
 import com.example.meatorder.data.entity.TemplateItem
 import com.example.meatorder.databinding.FragmentTemplateEditBinding
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
 import kotlinx.coroutines.flow.collectLatest
@@ -45,7 +46,6 @@ class TemplateEditFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        applyFontSize(binding.root, getPrefs().fontSize)
 
         templateId = arguments?.getInt("templateId", -1) ?: -1
         templateName = arguments?.getString("templateName", "") ?: ""
@@ -54,6 +54,7 @@ class TemplateEditFragment : Fragment() {
         header?.title = templateName
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        applyFontSize(binding.root, getPrefs().fontSize)
 
         binding.recyclerViewItems.layoutManager = LinearLayoutManager(requireContext())
 
