@@ -1,4 +1,4 @@
-﻿package com.example.meatorder.ui
+package com.example.meatorder.ui
 
 import android.view.LayoutInflater
 import android.view.View
@@ -65,22 +65,24 @@ class Order2Adapter(
             } else {
                 binding.root.setBackgroundColor(ContextCompat.getColor(binding.root.context, android.R.color.white))
             }
-            binding.checkbox.setOnCheckedChangeListener { _, isChecked ->
-                item.selected = isChecked
-                if (isChecked) onEntityClick(item, adapterPosition)
-                else {
+
+            // Клик по всей строке
+            binding.root.setOnClickListener {
+                item.selected = !item.selected
+                binding.checkbox.isChecked = item.selected
+                if (item.selected) {
+                    onEntityClick(item, adapterPosition)
+                } else {
                     item.inputType = null
                     item.quantity = 0
                     notifyItemChanged(adapterPosition)
                 }
             }
+
             if (item.inputType != null) {
                 binding.tvSummary.text = "${item.quantity} ${item.inputType!!.short_name}"
                 binding.tvSummary.visibility = View.VISIBLE
             } else binding.tvSummary.visibility = View.GONE
-            binding.root.setOnClickListener {
-                if (item.selected) onEntityClick(item, adapterPosition)
-            }
         }
     }
 }
