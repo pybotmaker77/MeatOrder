@@ -23,9 +23,6 @@ class RemainsFragment : Fragment() {
     private var _binding: FragmentRemainsBinding? = null
     private val binding get() = _binding!!
 
-    private val TYPE_HEADER = 0
-    private val TYPE_ITEM = 1
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,7 +52,6 @@ class RemainsFragment : Fragment() {
         // Группировка и сортировка
         val grouped = entities.groupBy { it.group }
         val flatList = mutableListOf<Any>()
-        // Сортируем группы по алфавиту
         val sortedGroups = grouped.keys.sorted()
         for (group in sortedGroups) {
             flatList.add(group)
@@ -63,51 +59,8 @@ class RemainsFragment : Fragment() {
             flatList.addAll(sortedEntities)
         }
 
-        val adapter = RemainsAdapter(this@RemainsFragment, flatList.filterIsInstance<MeatEntity>(), inputTypes) {
+        val adapter = RemainsAdapter(this@RemainsFragment, flatList, inputTypes) {
             // Данные изменились, ничего не делаем
-        }
-
-        // Свой адаптер для группировки
-        val groupingAdapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-            override fun getItemViewType(position: Int): Int {
-                return if (flatList[position] is String) TYPE_HEADER else TYPE_ITEM
-            }
-
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                return when (viewType) {
-                    TYPE_HEADER -> {
-                        val view = android.widget.TextView(parent.context).apply {
-                            setPadding(32, 16, 16, 8)
-                            setBackgroundColor(0xFFF0F0F0.toInt())
-                            setTextColor(0xFF333333.toInt())
-                        }
-                        object : RecyclerView.ViewHolder(view) {}
-                    }
-                    else -> {
-                        adapter.onCreateViewHolder(parent, viewType)
-                    }
-                }
-            }
-
-            override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-                val item = flatList[position]
-                when (holder.itemViewType) {
-                    TYPE_HEADER -> {
-                        (holder.itemView as android.widget.TextView).text = item as String
-                        applyFontSize(holder.itemView, getPrefs().fontSize, getPrefs().fontSize + 2)
-                    }
-                    TYPE_ITEM -> {
-                        val entity = item as MeatEntity
-                        val entityIndex = adapter.items.indexOf(entity)
-                        if (entityIndex != -1) {
-                            adapter.onBindViewHolder(holder as RemainsAdapter.ViewHolder, entityIndex)
-                        }
-                    }
-                }
-            }
-
-            override fun getItemCount() = flatList.size
         }
 
         binding.recyclerRemains.layoutManager = LinearLayoutManager(requireContext())
@@ -123,11 +76,10 @@ class RemainsFragment : Fragment() {
                 }
             }
         )
-        binding.recyclerRemains.adapter = groupingAdapter
+        binding.recyclerRemains.adapter = adapter
 
         binding.fabContinue.setOnClickListener {
             val remainData = adapter.getRemainData()
-            // Передаём только те позиции, для которых не указан остаток (quantity == 0)
             val emptyEntities = entities.filter { entity ->
                 val data = remainData[entity.id]
                 data == null || data.second == 0
