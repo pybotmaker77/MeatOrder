@@ -7,6 +7,7 @@ import com.example.meatorder.data.entity.Pattern
 import com.example.meatorder.utils.PreferencesHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class MeatOrderApp : Application() {
