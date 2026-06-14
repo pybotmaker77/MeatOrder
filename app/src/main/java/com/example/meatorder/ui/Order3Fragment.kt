@@ -150,11 +150,12 @@ class Order3Fragment : Fragment() {
 
     private fun showEditDialog(item: Order3Item) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_select_form, null)
-        applyFontSize(dialogView, getPrefs().fontSize)
+        applyFontSize(dialogView, getPrefs().fontSize)  // <-- применяем шрифт к dialogView
 
         val rg = dialogView.findViewById<RadioGroup>(R.id.rgTypes)
         val etQty = dialogView.findViewById<EditText>(R.id.etQuantity)
 
+        // Добавляем радиокнопки
         for (type in inputTypes) {
             val rb = RadioButton(requireContext())
             rb.text = type.type_name
@@ -184,10 +185,22 @@ class Order3Fragment : Fragment() {
                 }
             }
             .setNegativeButton("Отмена", null)
-            .show()
+            .create()
 
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+        dialog.setOnShowListener { dialogInterface ->
+            (dialogInterface as? AlertDialog)?.let {
+                it.window?.decorView?.let { rootView ->
+                    applyFontSize(rootView, getPrefs().fontSize)
+                }
+                it.getButton(AlertDialog.BUTTON_POSITIVE)?.let { btn ->
+                    applyFontSize(btn, getPrefs().fontSize)
+                }
+                it.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { btn ->
+                    applyFontSize(btn, getPrefs().fontSize)
+                }
+            }
+        }
+        dialog.show()
     }
 
     private fun saveDraft() {
