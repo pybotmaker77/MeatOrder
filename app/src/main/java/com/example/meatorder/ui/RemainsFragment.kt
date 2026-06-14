@@ -95,7 +95,7 @@ class RemainsFragment : Fragment() {
 
         binding.fabContinue.setOnClickListener {
             lifecycleScope.launch {
-                val remainData = adapter.getRemainData()
+                val remainData = adapter.remainData  // прямое обращение к свойству
                 val minOrderItems = getDao().getAllMinOrderItems().first()
 
                 // Рассчитываем заказ
@@ -118,7 +118,6 @@ class RemainsFragment : Fragment() {
                     }
                 }
 
-                // Если ничего не добавилось, передаём пустой список
                 val selectedJson = com.google.gson.Gson().toJson(orderList)
                 val bundle = Bundle().apply {
                     putBoolean("byBalance", true)
