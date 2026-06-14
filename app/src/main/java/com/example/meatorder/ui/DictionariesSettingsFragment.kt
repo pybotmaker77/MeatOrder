@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.meatorder.R
 import com.example.meatorder.data.dao.AppDao
 import com.example.meatorder.utils.*
 import kotlinx.coroutines.Dispatchers
@@ -51,10 +52,13 @@ class DictionariesSettingsFragment : Fragment() {
         dao = getDao()
         prefs = getPrefs()
 
-        val layout = LinearLayout(requireContext()).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(16, 16, 16, 16)
-        }
+        val view = inflater.inflate(R.layout.fragment_dictionaries_settings, container, false)
+
+        val header = view.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
+        header?.setNavigationOnClickListener { findNavController().popBackStack() }
+        header?.setBackgroundColor(prefs.headerColor)
+
+        val container = view.findViewById<LinearLayout>(R.id.container)
 
         val btnPath = Button(requireContext()).apply {
             text = "ПУТЬ К ФАЙЛАМ"
@@ -69,11 +73,13 @@ class DictionariesSettingsFragment : Fragment() {
             setOnClickListener { importZipLauncher.launch(arrayOf("application/zip")) }
         }
 
-        layout.addView(btnPath)
-        layout.addView(btnExport)
-        layout.addView(btnImport)
+        container.addView(btnPath)
+        container.addView(btnExport)
+        container.addView(btnImport)
 
-        return layout
+        applyFontSize(view, prefs.fontSize)
+
+        return view
     }
 
     private fun exportFiles() {
