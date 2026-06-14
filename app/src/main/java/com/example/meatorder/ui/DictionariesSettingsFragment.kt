@@ -82,9 +82,8 @@ class DictionariesSettingsFragment : Fragment() {
     }
 
     private fun exportFiles() {
-        lifecycleScope.launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             try {
-                // Получаем данные до создания архива
                 val entities = dao.getAllEntities().first()
                 val inputTypes = dao.getAllInputTypes().first()
                 val templates = dao.getAllTemplates().first()
@@ -95,7 +94,6 @@ class DictionariesSettingsFragment : Fragment() {
 
                 val zipFile = File(requireContext().cacheDir, "справочники.zip")
                 ZipOutputStream(FileOutputStream(zipFile)).use { zos ->
-                    // Entities CSV
                     zos.putNextEntry(ZipEntry("entities.csv"))
                     zos.write("entity;group\n".toByteArray())
                     for (e in entities) {
@@ -103,7 +101,6 @@ class DictionariesSettingsFragment : Fragment() {
                     }
                     zos.closeEntry()
 
-                    // Input types CSV
                     zos.putNextEntry(ZipEntry("input_types.csv"))
                     zos.write("type_name;short_name;weight_kg\n".toByteArray())
                     for (t in inputTypes) {
@@ -111,7 +108,6 @@ class DictionariesSettingsFragment : Fragment() {
                     }
                     zos.closeEntry()
 
-                    // Templates CSV
                     zos.putNextEntry(ZipEntry("templates.csv"))
                     zos.write("temp;entity;input_type;input_default\n".toByteArray())
                     for (t in templates) {
@@ -124,7 +120,6 @@ class DictionariesSettingsFragment : Fragment() {
                     zos.closeEntry()
                 }
 
-                // Отправка архива
                 val uri = FileProvider.getUriForFile(
                     requireContext(),
                     "${requireContext().packageName}.fileprovider",
@@ -135,9 +130,13 @@ class DictionariesSettingsFragment : Fragment() {
                     putExtra(Intent.EXTRA_STREAM, uri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                startActivity(Intent.createChooser(shareIntent, "Отправить справочники"))
+                withContext(Dispatchers.Main) {
+                    startActivity(Intent.createChooser(shareIntent, "Отправить справочники"))
+                }
             } catch (e: Exception) {
-                Toast.makeText(requireContext(), "Ошибка экспорта: ${e.message}", Toast.LENGTH_LONG).show()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Ошибка экспорта: ${e.message}", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
