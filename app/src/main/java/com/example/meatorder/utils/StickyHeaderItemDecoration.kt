@@ -8,11 +8,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class StickyHeaderItemDecoration(
-    private val items: List<Any>,
+    private val getItems: () -> List<Any>,      // лямбда для получения актуального списка
     private val headerHeight: Int = 120,
     private val backgroundColor: Int = 0xFFF0F0F0.toInt(),
     private val textColor: Int = 0xFF333333.toInt(),
-    private val getTextSize: () -> Float      // лямбда, возвращающая актуальный размер шрифта
+    private val getTextSize: () -> Float         // лямбда для получения актуального размера шрифта
 ) : RecyclerView.ItemDecoration() {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -27,12 +27,14 @@ class StickyHeaderItemDecoration(
     override fun onDrawOver(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDrawOver(c, parent, state)
 
-        // Получаем свежий размер шрифта
+        val items = getItems()
+        if (items.isEmpty()) return
+
         textPaint.textSize = getTextSize()
 
         val layoutManager = parent.layoutManager as? LinearLayoutManager ?: return
         val firstVisiblePos = layoutManager.findFirstVisibleItemPosition()
-        if (firstVisiblePos == RecyclerView.NO_POSITION || items.isEmpty()) return
+        if (firstVisiblePos == RecyclerView.NO_POSITION) return
 
         var headerPos = firstVisiblePos
         while (headerPos >= 0 && items[headerPos] !is String) {
@@ -43,7 +45,7 @@ class StickyHeaderItemDecoration(
         val title = items[headerPos] as String
 
         var offsetY = 0
-        val nextHeaderPos = findNextHeader(headerPos)
+        val nextHeaderPos = findNextHeader(items, headerPos)
         if (nextHeaderPos != -1) {
             val nextHeaderView = layoutManager.findViewByPosition(nextHeaderPos)
             if (nextHeaderView != null) {
@@ -61,7 +63,7 @@ class StickyHeaderItemDecoration(
         c.drawText(title, textX, textY, textPaint)
     }
 
-    private fun findNextHeader(currentPos: Int): Int {
+    private fun findNextHeader(items: List<Any>, currentPos: Int): Int {
         for (i in currentPos + 1 until items.size) {
             if (items[i] is String) return i
         }
