@@ -27,7 +27,6 @@ class DirectoryEditFragment : Fragment() {
     private lateinit var adapter: RecyclerView.Adapter<*>
     private var dict: String = "entities"
 
-    // Поле для хранения текущего плоского списка номенклатуры
     private var flatList = mutableListOf<Any>()
 
     private val importFileLauncher = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -64,14 +63,15 @@ class DirectoryEditFragment : Fragment() {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.fabAdd.setOnClickListener { showAddDialog(dict) }
 
-        // Добавляем декоратор один раз, он будет использовать актуальный flatList через лямбду
+        // Добавляем декоратор один раз, с добавкой +20sp к размеру шрифта
         binding.recyclerView.addItemDecoration(
             StickyHeaderItemDecoration(
                 getItems = { flatList },
                 headerHeight = 120,
                 backgroundColor = 0xFFF0F0F0.toInt(),
                 textColor = 0xFF333333.toInt(),
-                getTextSize = { getPrefs().fontSize.toFloat() }
+                getTextSize = { getPrefs().fontSize.toFloat() },
+                textSizeOffset = 20f
             )
         )
 
@@ -144,7 +144,7 @@ class DirectoryEditFragment : Fragment() {
                 newFlatList.add(group)
                 newFlatList.addAll(list)
             }
-            flatList = newFlatList   // обновляем поле, декоратор подхватит через getItems
+            flatList = newFlatList
 
             adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -206,7 +206,6 @@ class DirectoryEditFragment : Fragment() {
                 override fun getItemCount() = flatList.size
             }
             binding.recyclerView.adapter = adapter
-            // декоратор уже добавлен, повторно не добавляем
         }
     }
 
