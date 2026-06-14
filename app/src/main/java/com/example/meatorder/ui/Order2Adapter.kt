@@ -67,11 +67,10 @@ class Order2Adapter(
         fun bind(item: Order2Item) {
             binding.tvEntity.text = item.entity?.entity
 
-            // Отображение сводки
             if (item.selected && item.inputType != null && item.quantity > 0) {
                 binding.tvSummary.text = "${item.quantity} ${item.inputType!!.short_name}"
                 binding.tvSummary.visibility = View.VISIBLE
-                binding.root.setBackgroundColor(0x55339933.toInt()) // полупрозрачный салатовый
+                binding.root.setBackgroundColor(0x55339933.toInt())
             } else if (item.selected) {
                 binding.tvSummary.visibility = View.GONE
                 binding.root.setBackgroundColor(ContextCompat.getColor(binding.root.context, R.color.yellow_highlight))
