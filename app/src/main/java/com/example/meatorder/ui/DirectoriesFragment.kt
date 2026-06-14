@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentDirectoriesBinding
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getPrefs
 
 class DirectoriesFragment : Fragment() {
@@ -29,6 +30,8 @@ class DirectoriesFragment : Fragment() {
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
         header?.title = "Справочники"
+
+        applyFontSize(binding.root, getPrefs().fontSize)
 
         binding.btnEntities.setOnClickListener { navigateToEditor("entities") }
         binding.btnMinOrder.setOnClickListener { navigateToEditor("min_order") }
