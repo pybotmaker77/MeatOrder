@@ -35,7 +35,7 @@ class DirectoryEditFragment : Fragment() {
     private val TYPE_ITEM = 1
 
     private var flatList = mutableListOf<Any>()
-    private var minOrderAdapter: RemainsAdapter? = null   // ← новое поле
+    private var minOrderAdapter: RemainsAdapter? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -53,6 +53,15 @@ class DirectoryEditFragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        // Устанавливаем заголовок в зависимости от раздела
+        header?.title = when (dict) {
+            "entities" -> "Номенклатура"
+            "templates" -> "Шаблоны"
+            "input_types" -> "Единицы измерения"
+            "patterns" -> "Паттерны"
+            "min_order" -> "Минимальный заказ"
+            else -> "Справочник"
+        }
 
         val importButton = Button(requireContext()).apply {
             text = "Импорт"
