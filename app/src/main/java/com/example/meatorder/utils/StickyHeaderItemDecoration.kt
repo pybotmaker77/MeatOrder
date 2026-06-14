@@ -8,11 +8,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class StickyHeaderItemDecoration(
-    private val getItems: () -> List<Any>,      // лямбда для получения актуального списка
+    private val getItems: () -> List<Any>,
     private val headerHeight: Int = 120,
     private val backgroundColor: Int = 0xFFF0F0F0.toInt(),
     private val textColor: Int = 0xFF333333.toInt(),
-    private val getTextSize: () -> Float         // лямбда для получения актуального размера шрифта
+    private val getTextSize: () -> Float,
+    private val textSizeOffset: Float = 20f  // Добавка к базовому размеру
 ) : RecyclerView.ItemDecoration() {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -30,7 +31,8 @@ class StickyHeaderItemDecoration(
         val items = getItems()
         if (items.isEmpty()) return
 
-        textPaint.textSize = getTextSize()
+        // Применяем размер шрифта с добавкой
+        textPaint.textSize = getTextSize() + textSizeOffset
 
         val layoutManager = parent.layoutManager as? LinearLayoutManager ?: return
         val firstVisiblePos = layoutManager.findFirstVisibleItemPosition()
