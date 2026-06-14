@@ -38,6 +38,7 @@ class Order1Fragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        header?.title = "Заказ"
         applyFontSize(binding.root, getPrefs().fontSize)
 
         binding.btnBalance.setOnClickListener {
