@@ -55,10 +55,18 @@ class DictionariesSettingsFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_dictionaries_settings, container, false)
 
         val header = view.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
-        header?.setNavigationOnClickListener { findNavController().popBackStack() }
+        header?.setNavigationOnClickListener {
+            // Используем NavHostFragment для навигации
+            requireActivity().supportFragmentManager.findFragmentById(R.id.nav_host_fragment)
+                ?.let { fragment ->
+                    (fragment as? androidx.navigation.fragment.NavHostFragment)
+                        ?.navController
+                        ?.popBackStack()
+                }
+        }
         header?.setBackgroundColor(prefs.headerColor)
 
-        val container = view.findViewById<LinearLayout>(R.id.container)
+        val containerLayout = view.findViewById<LinearLayout>(R.id.container)
 
         val btnPath = Button(requireContext()).apply {
             text = "ПУТЬ К ФАЙЛАМ"
@@ -73,9 +81,9 @@ class DictionariesSettingsFragment : Fragment() {
             setOnClickListener { importZipLauncher.launch(arrayOf("application/zip")) }
         }
 
-        container.addView(btnPath)
-        container.addView(btnExport)
-        container.addView(btnImport)
+        containerLayout.addView(btnPath)
+        containerLayout.addView(btnExport)
+        containerLayout.addView(btnImport)
 
         applyFontSize(view, prefs.fontSize)
 
