@@ -24,6 +24,9 @@ interface AppDao {
     @Delete
     suspend fun deleteEntity(entity: MeatEntity)
 
+    @Query("DELETE FROM entities")
+    suspend fun deleteAllEntities()
+
     @Query("SELECT * FROM templates ORDER BY temp")
     fun getAllTemplates(): Flow<List<Template>>
 
@@ -39,6 +42,9 @@ interface AppDao {
     @Delete
     suspend fun deleteTemplate(template: Template)
 
+    @Query("DELETE FROM templates")
+    suspend fun deleteAllTemplates()
+
     @Query("SELECT * FROM template_items WHERE template_id = :templateId")
     fun getTemplateItems(templateId: Int): Flow<List<TemplateItem>>
 
@@ -50,6 +56,9 @@ interface AppDao {
 
     @Delete
     suspend fun deleteTemplateItem(item: TemplateItem)
+
+    @Query("DELETE FROM template_items")
+    suspend fun deleteAllTemplateItems()
 
     @Query("SELECT * FROM patterns")
     fun getAllPatterns(): Flow<List<Pattern>>
@@ -84,12 +93,6 @@ interface AppDao {
     @Delete
     suspend fun deleteInputType(inputType: InputType)
 
-    @Query("DELETE FROM entities")
-    suspend fun deleteAllEntities()
-    
     @Query("DELETE FROM input_types")
     suspend fun deleteAllInputTypes()
-    
-    @Query("DELETE FROM templates")
-    suspend fun deleteAllTemplates()
 }
