@@ -65,7 +65,7 @@ class Order2Fragment : Fragment() {
                 templateItems.addAll(items)
             }
 
-            // Разбираем initialItemsJson (результат расчёта из остатков)
+            // Разбираем initialItemsJson (результат расчёта из остатков или черновик)
             val initialMap = mutableMapOf<Int, Pair<String, Int>>()
             if (!initialItemsJson.isNullOrEmpty()) {
                 try {
@@ -82,8 +82,11 @@ class Order2Fragment : Fragment() {
                 }
             }
 
-            // Сортируем сущности по group, затем по entity
-            val sortedEntities = entities.sortedWith(compareBy<MeatEntity> { it.group }.thenBy { it.entity })
+            // Сортировка: группа -> наименование
+            val sortedEntities = entities.sortedWith(Comparator { a, b ->
+                val groupComp = a.group.compareTo(b.group)
+                if (groupComp != 0) groupComp else a.entity.compareTo(b.entity)
+            })
             val grouped = sortedEntities.groupBy { it.group }
             val list = mutableListOf<Order2Item>()
             for ((group, ents) in grouped) {
