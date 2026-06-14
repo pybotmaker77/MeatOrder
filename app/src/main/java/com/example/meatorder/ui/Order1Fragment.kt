@@ -1,17 +1,16 @@
 package com.example.meatorder.ui
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.data.entity.Template
 import com.example.meatorder.databinding.FragmentOrder1Binding
-import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
 import kotlinx.coroutines.CoroutineScope
@@ -38,7 +37,6 @@ class Order1Fragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
-        applyFontSize(binding.root, getPrefs().fontSize)
 
         binding.btnBalance.setOnClickListener {
             findNavController().navigate(R.id.action_order1Fragment_to_remainsFragment)
@@ -61,8 +59,12 @@ class Order1Fragment : Fragment() {
             }
         }
 
+        // Кнопка "ШАБЛОНЫ" теперь ведёт сразу на редактор шаблонов
         binding.btnTemplates.setOnClickListener {
-            Toast.makeText(requireContext(), "Управление шаблонами (в разработке)", Toast.LENGTH_SHORT).show()
+            val bundle = Bundle().apply {
+                putString("dict", "templates")
+            }
+            findNavController().navigate(R.id.action_order1Fragment_to_directoryEditFragment, bundle)
         }
     }
 
@@ -73,7 +75,7 @@ class Order1Fragment : Fragment() {
         }
         val names = templates.map { it.temp }.toTypedArray()
         val checked = BooleanArray(templates.size) { false }
-        val dialog = AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(requireContext())
             .setTitle("Выберите шаблоны")
             .setMultiChoiceItems(names, checked) { _, index, isChecked ->
                 checked[index] = isChecked
@@ -89,11 +91,6 @@ class Order1Fragment : Fragment() {
             }
             .setNegativeButton("Отмена", null)
             .show()
-
-        // Применяем шрифт ко всем элементам диалога
-        applyFontSize(dialog.window?.decorView ?: return, getPrefs().fontSize)
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
     override fun onDestroyView() {
