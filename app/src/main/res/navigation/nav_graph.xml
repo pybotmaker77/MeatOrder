@@ -104,6 +104,9 @@
         <action
             android:id="@+id/action_settingsFragment_to_directoriesFragment"
             app:destination="@id/directoriesFragment" />
+        <action
+            android:id="@+id/action_settingsFragment_to_dictionariesSettingsFragment"
+            app:destination="@id/dictionariesSettingsFragment" />
     </fragment>
 
     <fragment
@@ -153,4 +156,11 @@
             android:name="templateName"
             app:argType="string" />
     </fragment>
+
+    <fragment
+        android:id="@+id/dictionariesSettingsFragment"
+        android:name="com.example.meatorder.ui.DictionariesSettingsFragment"
+        android:label="Настройки справочников"
+        tools:layout="@layout/fragment_dictionaries_settings" />
+
 </navigation>
