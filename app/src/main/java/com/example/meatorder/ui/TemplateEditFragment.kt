@@ -118,11 +118,9 @@ class TemplateEditFragment : Fragment() {
                         text1.text = entity?.entity ?: "???"
                         text2.text = "${templateItem.input_default} ${templateItem.input_type}"
 
-                        // Кнопка «Ред.»
                         btnEdit.setOnClickListener {
                             showEditItemDialog(templateItem)
                         }
-                        // Долгое нажатие – удаление
                         holder.itemView.setOnLongClickListener {
                             AlertDialog.Builder(requireContext())
                                 .setTitle("Удалить элемент")
@@ -145,7 +143,77 @@ class TemplateEditFragment : Fragment() {
     }
 
     private fun showAddItemDialog() {
-        // ... (как в предыдущей версии, с Spinner'ами, применяющими шрифт)
+        if (entities.isEmpty() || inputTypes.isEmpty()) {
+            Toast.makeText(requireContext(), "Сначала заполните справочники", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+        val spinnerEntity = Spinner(requireContext()).apply {
+            adapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, entities.map { it.entity }) {
+                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    val view = super.getView(position, convertView, parent) as TextView
+                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    return view
+                }
+                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    val view = super.getDropDownView(position, convertView, parent) as TextView
+                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    return view
+                }
+            }
+        }
+        val spinnerType = Spinner(requireContext()).apply {
+            adapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, inputTypes.map { it.type_name }) {
+                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    val view = super.getView(position, convertView, parent) as TextView
+                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    return view
+                }
+                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    val view = super.getDropDownView(position, convertView, parent) as TextView
+                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    return view
+                }
+            }
+        }
+        val etQuantity = EditText(requireContext()).apply {
+            hint = "Количество"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+        }
+
+        layout.addView(spinnerEntity)
+        layout.addView(spinnerType)
+        layout.addView(etQuantity)
+        applyFontSize(layout, getPrefs().fontSize)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Добавить позицию в шаблон")
+            .setView(layout)
+            .setPositiveButton("Добавить") { _, _ ->
+                val entityIndex = spinnerEntity.selectedItemPosition
+                val typeIndex = spinnerType.selectedItemPosition
+                val qty = etQuantity.text.toString().toIntOrNull() ?: 0
+                if (entityIndex >= 0 && typeIndex >= 0 && qty > 0) {
+                    val entityId = entities[entityIndex].id
+                    val inputTypeName = inputTypes[typeIndex].type_name
+                    lifecycleScope.launch {
+                        getDao().insertTemplateItem(
+                            TemplateItem(
+                                template_id = templateId,
+                                entity_id = entityId,
+                                input_type = inputTypeName,
+                                input_default = qty
+                            )
+                        )
+                    }
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
     private fun showEditItemDialog(item: TemplateItem) {
