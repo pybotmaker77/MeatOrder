@@ -83,7 +83,7 @@ class RemainsFragment : Fragment() {
                 backgroundColor = 0xFFF0F0F0.toInt(),
                 textColor = 0xFF333333.toInt(),
                 getTextSize = { getPrefs().fontSize.toFloat() },
-                textSizeOffset = 20f
+                textSizeOffset = 40f
             )
         )
         binding.recyclerRemains.adapter = adapter
