@@ -11,9 +11,11 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.meatorder.MeatOrderApp
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.launch
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -89,5 +91,13 @@ fun applyFontSize(view: View, fontSize: Int, headerSize: Int = fontSize + 5) {
         for (i in 0 until view.childCount) {
             applyFontSize(view.getChildAt(i), fontSize, headerSize)
         }
+    }
+}
+
+fun Fragment.syncDictionaries() {
+    val prefs = (requireActivity().application as MeatOrderApp).prefs
+    val folderUriStr = prefs.dictionariesFolderUri ?: return
+    lifecycleScope.launch {
+        DictionarySync.exportAllToFolder(requireContext(), Uri.parse(folderUriStr), getDao())
     }
 }
