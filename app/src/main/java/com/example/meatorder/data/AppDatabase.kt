@@ -8,7 +8,7 @@ import com.example.meatorder.data.dao.AppDao
 import com.example.meatorder.data.entity.*
 
 @Database(
-    entities = [MeatEntity::class, Template::class, TemplateItem::class, Pattern::class, InputType::class],
+    entities = [MeatEntity::class, Template::class, TemplateItem::class, Pattern::class, InputType::class, MinOrderItem::class],
     version = 1,
     exportSchema = false
 )
