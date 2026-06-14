@@ -46,13 +46,15 @@
             style="@style/MeatButton"
             android:text="Копировать"
             android:layout_width="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/btnSend"
             style="@style/MeatButton"
             android:text="Отправить"
             android:layout_width="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
