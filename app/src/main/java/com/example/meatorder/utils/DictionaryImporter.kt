@@ -114,8 +114,10 @@ object DictionaryImporter {
                 .add(TemplateItem(entity_id = entity.id, input_type = inputType, input_default = qty, template_id = 0))
         }
 
-        dao.deleteAllTemplates()
+        // Сначала удаляем элементы, потом шаблоны (из-за внешнего ключа)
         dao.deleteAllTemplateItems()
+        dao.deleteAllTemplates()
+
         for ((name, items) in map) {
             val id = dao.insertTemplate(Template(temp = name))
             for (item in items) {
