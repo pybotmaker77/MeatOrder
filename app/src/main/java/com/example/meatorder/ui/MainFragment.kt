@@ -37,16 +37,36 @@ class MainFragment : Fragment() {
         }
 
         if (!prefs.draftOrderJson.isNullOrEmpty()) {
-            AlertDialog.Builder(requireContext())
+            val dialog = AlertDialog.Builder(requireContext())
                 .setTitle("Незавершённый заказ")
                 .setMessage("У вас есть незавершённый заказ. Продолжить?")
                 .setPositiveButton("Да") { _, _ ->
-                    findNavController().navigate(R.id.action_mainFragment_to_order2Fragment)
+                    val draftJson = prefs.draftOrderJson
+                    val bundle = Bundle().apply {
+                        putBoolean("byBalance", false)
+                        putIntArray("templateIds", intArrayOf())
+                        putString("selectedItemsJson", draftJson)
+                    }
+                    findNavController().navigate(R.id.action_mainFragment_to_order3Fragment, bundle)
                 }
                 .setNegativeButton("Нет") { _, _ ->
                     prefs.clearDraft()
                 }
-                .show()
+                .create()
+            dialog.setOnShowListener { dialogInterface ->
+                (dialogInterface as? AlertDialog)?.let {
+                    it.window?.decorView?.let { rootView ->
+                        applyFontSize(rootView, prefs.fontSize)
+                    }
+                    it.getButton(AlertDialog.BUTTON_POSITIVE)?.let { btn ->
+                        applyFontSize(btn, prefs.fontSize)
+                    }
+                    it.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { btn ->
+                        applyFontSize(btn, prefs.fontSize)
+                    }
+                }
+            }
+            dialog.show()
         }
     }
 
