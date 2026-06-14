@@ -18,7 +18,7 @@ import com.example.meatorder.utils.getPrefs
 
 class RemainsAdapter(
     private val fragment: androidx.fragment.app.Fragment,
-    private val items: List<Any>,               // String (заголовок) или MeatEntity
+    private val items: List<Any>,
     private val inputTypes: List<InputType>,
     private val onDataChanged: () -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -47,7 +47,6 @@ class RemainsAdapter(
                     setPadding(32, 16, 16, 8)
                     setBackgroundColor(0xFFF0F0F0.toInt())
                     setTextColor(0xFF333333.toInt())
-                    // размер применится в bind
                 }
                 HeaderViewHolder(view)
             }
@@ -77,8 +76,10 @@ class RemainsAdapter(
             if (data != null && data.second > 0 && data.first != null) {
                 binding.tvRemainSummary.text = "${data.second} ${data.first!!.short_name}"
                 binding.tvRemainSummary.visibility = View.VISIBLE
+                binding.root.setBackgroundColor(0x55339933.toInt())
             } else {
                 binding.tvRemainSummary.visibility = View.GONE
+                binding.root.setBackgroundColor(android.graphics.Color.WHITE)
             }
 
             binding.btnAddRemain.setOnClickListener {
@@ -123,6 +124,11 @@ class RemainsAdapter(
                         onDataChanged()
                     }
                 }
+                .setNeutralButton("Удалить") { _, _ ->
+                    remainData.remove(entity.id)
+                    notifyItemChanged(adapterPosition)
+                    onDataChanged()
+                }
                 .setNegativeButton("Отмена", null)
                 .create()
 
@@ -132,6 +138,9 @@ class RemainsAdapter(
                         applyFontSize(rootView, fragment.getPrefs().fontSize)
                     }
                     it.getButton(AlertDialog.BUTTON_POSITIVE)?.let { btn ->
+                        applyFontSize(btn, fragment.getPrefs().fontSize)
+                    }
+                    it.getButton(AlertDialog.BUTTON_NEUTRAL)?.let { btn ->
                         applyFontSize(btn, fragment.getPrefs().fontSize)
                     }
                     it.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { btn ->
