@@ -142,58 +142,60 @@ class TemplateEditFragment : Fragment() {
         }
     }
 
+    private fun makeSpinnerAdapter(items: List<String>): ArrayAdapter<String> {
+        return object : ArrayAdapter<String>(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            items
+        ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent) as TextView
+                view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                view.setPadding(10, 10, 10, 10)
+                return view
+            }
+            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val inflater = LayoutInflater.from(context)
+                val dropView = inflater.inflate(R.layout.item_spinner_dropdown, parent, false)
+                val text = dropView.findViewById<TextView>(R.id.text1)
+                text.text = getItem(position)
+                text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                return dropView
+            }
+        }
+    }
+
     private fun showAddItemDialog() {
         if (entities.isEmpty() || inputTypes.isEmpty()) {
             Toast.makeText(requireContext(), "Сначала заполните справочники", Toast.LENGTH_SHORT).show()
             return
         }
 
+        val groups = entities.map { it.group }.distinct().sorted()
+
         val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
 
-        val spinnerEntity = Spinner(requireContext()).apply {
-            adapter = object : ArrayAdapter<String>(
-                requireContext(),
-                android.R.layout.simple_spinner_item,
-                entities.map { it.entity }
-            ) {
-                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val view = super.getView(position, convertView, parent) as TextView
-                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    view.setPadding(10, 10, 10, 10)
-                    return view
-                }
-                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val inflater = LayoutInflater.from(context)
-                    val dropView = inflater.inflate(R.layout.item_spinner_dropdown, parent, false)
-                    val text = dropView.findViewById<TextView>(R.id.text1)
-                    text.text = getItem(position)
-                    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    return dropView
-                }
-            }
+        // Группа
+        val spinnerGroup = Spinner(requireContext()).apply {
+            adapter = makeSpinnerAdapter(groups)
         }
 
-        val spinnerType = Spinner(requireContext()).apply {
-            adapter = object : ArrayAdapter<String>(
-                requireContext(),
-                android.R.layout.simple_spinner_item,
-                inputTypes.map { it.type_name }
-            ) {
-                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val view = super.getView(position, convertView, parent) as TextView
-                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    view.setPadding(10, 10, 10, 10)
-                    return view
-                }
-                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val inflater = LayoutInflater.from(context)
-                    val dropView = inflater.inflate(R.layout.item_spinner_dropdown, parent, false)
-                    val text = dropView.findViewById<TextView>(R.id.text1)
-                    text.text = getItem(position)
-                    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    return dropView
-                }
+        // Список элементов (изначально пустой, обновится при выборе группы)
+        val spinnerEntity = Spinner(requireContext())
+
+        // Обновление списка элементов при смене группы
+        spinnerGroup.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedGroup = groups[position]
+                val filtered = entities.filter { it.group == selectedGroup }.map { it.entity }
+                spinnerEntity.adapter = makeSpinnerAdapter(filtered)
             }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        // Единицы измерения
+        val spinnerType = Spinner(requireContext()).apply {
+            adapter = makeSpinnerAdapter(inputTypes.map { it.type_name })
         }
 
         val etQuantity = EditText(requireContext()).apply {
@@ -201,7 +203,8 @@ class TemplateEditFragment : Fragment() {
             inputType = android.text.InputType.TYPE_CLASS_NUMBER
         }
 
-        // Добавляем элементы с отступами между ними
+        layout.addView(spinnerGroup)
+        layout.addView(Space(requireContext()).apply { minimumHeight = 16 })
         layout.addView(spinnerEntity)
         layout.addView(Space(requireContext()).apply { minimumHeight = 16 })
         layout.addView(spinnerType)
@@ -213,11 +216,11 @@ class TemplateEditFragment : Fragment() {
             .setTitle("Добавить позицию в шаблон")
             .setView(layout)
             .setPositiveButton("Добавить") { _, _ ->
-                val entityIndex = spinnerEntity.selectedItemPosition
+                val entityName = (spinnerEntity.selectedItem as? String) ?: return@setPositiveButton
+                val entityId = entities.find { it.entity == entityName }?.id ?: return@setPositiveButton
                 val typeIndex = spinnerType.selectedItemPosition
                 val qty = etQuantity.text.toString().toIntOrNull() ?: 0
-                if (entityIndex >= 0 && typeIndex >= 0 && qty > 0) {
-                    val entityId = entities[entityIndex].id
+                if (typeIndex >= 0 && qty > 0) {
                     val inputTypeName = inputTypes[typeIndex].type_name
                     lifecycleScope.launch {
                         getDao().insertTemplateItem(
@@ -240,61 +243,42 @@ class TemplateEditFragment : Fragment() {
 
     private fun showEditItemDialog(item: TemplateItem) {
         val currentEntity = entities.find { it.id == item.entity_id }
-        val currentEntityIndex = entities.indexOf(currentEntity)
-        val currentTypeIndex = inputTypes.indexOfFirst { it.type_name == item.input_type }
+        val currentGroup = currentEntity?.group ?: ""
+        val groups = entities.map { it.group }.distinct().sorted()
 
         val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
-        val spinnerEntity = Spinner(requireContext()).apply {
-            adapter = object : ArrayAdapter<String>(
-                requireContext(),
-                android.R.layout.simple_spinner_item,
-                entities.map { it.entity }
-            ) {
-                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val view = super.getView(position, convertView, parent) as TextView
-                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    view.setPadding(10, 10, 10, 10)
-                    return view
-                }
-                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val inflater = LayoutInflater.from(context)
-                    val dropView = inflater.inflate(R.layout.item_spinner_dropdown, parent, false)
-                    val text = dropView.findViewById<TextView>(R.id.text1)
-                    text.text = getItem(position)
-                    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    return dropView
-                }
-            }
-            setSelection(if (currentEntityIndex >= 0) currentEntityIndex else 0)
+
+        val spinnerGroup = Spinner(requireContext()).apply {
+            adapter = makeSpinnerAdapter(groups)
+            val groupIndex = groups.indexOf(currentGroup)
+            if (groupIndex >= 0) setSelection(groupIndex)
         }
+
+        val spinnerEntity = Spinner(requireContext())
+        spinnerGroup.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selectedGroup = groups[position]
+                val filtered = entities.filter { it.group == selectedGroup }.map { it.entity }
+                spinnerEntity.adapter = makeSpinnerAdapter(filtered)
+                val entityIndex = filtered.indexOf(currentEntity?.entity ?: "")
+                if (entityIndex >= 0) spinnerEntity.setSelection(entityIndex)
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        val currentTypeIndex = inputTypes.indexOfFirst { it.type_name == item.input_type }
         val spinnerType = Spinner(requireContext()).apply {
-            adapter = object : ArrayAdapter<String>(
-                requireContext(),
-                android.R.layout.simple_spinner_item,
-                inputTypes.map { it.type_name }
-            ) {
-                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val view = super.getView(position, convertView, parent) as TextView
-                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    view.setPadding(10, 10, 10, 10)
-                    return view
-                }
-                override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val inflater = LayoutInflater.from(context)
-                    val dropView = inflater.inflate(R.layout.item_spinner_dropdown, parent, false)
-                    val text = dropView.findViewById<TextView>(R.id.text1)
-                    text.text = getItem(position)
-                    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    return dropView
-                }
-            }
-            setSelection(if (currentTypeIndex >= 0) currentTypeIndex else 0)
+            adapter = makeSpinnerAdapter(inputTypes.map { it.type_name })
+            if (currentTypeIndex >= 0) setSelection(currentTypeIndex)
         }
+
         val etQuantity = EditText(requireContext()).apply {
             setText(item.input_default.toString())
             inputType = android.text.InputType.TYPE_CLASS_NUMBER
         }
 
+        layout.addView(spinnerGroup)
+        layout.addView(Space(requireContext()).apply { minimumHeight = 16 })
         layout.addView(spinnerEntity)
         layout.addView(Space(requireContext()).apply { minimumHeight = 16 })
         layout.addView(spinnerType)
@@ -306,16 +290,17 @@ class TemplateEditFragment : Fragment() {
             .setTitle("Редактировать позицию")
             .setView(layout)
             .setPositiveButton("Сохранить") { _, _ ->
-                val entityIndex = spinnerEntity.selectedItemPosition
+                val entityName = (spinnerEntity.selectedItem as? String) ?: return@setPositiveButton
+                val entityId = entities.find { it.entity == entityName }?.id ?: return@setPositiveButton
                 val typeIndex = spinnerType.selectedItemPosition
                 val qty = etQuantity.text.toString().toIntOrNull() ?: item.input_default
-                if (entityIndex >= 0 && typeIndex >= 0 && qty > 0) {
+                if (typeIndex >= 0 && qty > 0) {
                     lifecycleScope.launch {
                         getDao().updateTemplateItem(
                             TemplateItem(
                                 id = item.id,
                                 template_id = item.template_id,
-                                entity_id = entities[entityIndex].id,
+                                entity_id = entityId,
                                 input_type = inputTypes[typeIndex].type_name,
                                 input_default = qty
                             )
