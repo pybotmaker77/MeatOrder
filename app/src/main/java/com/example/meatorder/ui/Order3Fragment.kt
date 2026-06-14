@@ -47,6 +47,7 @@ class Order3Fragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        header?.title = "Проверка заказа"
         applyFontSize(binding.root, getPrefs().fontSize)
 
         val selectedJson = arguments?.getString("selectedItemsJson") ?: return
@@ -149,6 +150,8 @@ class Order3Fragment : Fragment() {
 
     private fun showEditDialog(item: Order3Item) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_select_form, null)
+        applyFontSize(dialogView, getPrefs().fontSize)
+
         val rg = dialogView.findViewById<RadioGroup>(R.id.rgTypes)
         val etQty = dialogView.findViewById<EditText>(R.id.etQuantity)
 
@@ -160,8 +163,6 @@ class Order3Fragment : Fragment() {
         val index = inputTypes.indexOfFirst { it.type_name == item.inputType.type_name }
         if (index >= 0) (rg.getChildAt(index) as RadioButton).isChecked = true
         etQty.setText(item.quantity.toString())
-
-        applyFontSize(dialogView, getPrefs().fontSize) // после добавления RadioButton
 
         val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Редактировать")
