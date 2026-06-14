@@ -65,6 +65,10 @@
             android:name="preSelectedIds"
             app:argType="integer[]"
             android:defaultValue="@null" />
+        <argument
+            android:name="initialItemsJson"
+            app:argType="string"
+            android:defaultValue="@null" />
         <action
             android:id="@+id/action_order2Fragment_to_order3Fragment"
             app:destination="@id/order3Fragment" />
