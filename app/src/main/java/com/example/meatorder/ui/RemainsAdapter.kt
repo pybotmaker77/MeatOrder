@@ -7,7 +7,9 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.meatorder.R
 import com.example.meatorder.data.entity.InputType
 import com.example.meatorder.data.entity.MeatEntity
 import com.example.meatorder.databinding.ItemRemainsBinding
@@ -16,31 +18,55 @@ import com.example.meatorder.utils.getPrefs
 
 class RemainsAdapter(
     private val fragment: androidx.fragment.app.Fragment,
-    private val items: List<MeatEntity>,
+    private val items: List<Any>,               // String (заголовок) или MeatEntity
     private val inputTypes: List<InputType>,
     private val onDataChanged: () -> Unit
-) : RecyclerView.Adapter<RemainsAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    companion object {
+        private const val TYPE_HEADER = 0
+        private const val TYPE_ITEM = 1
+    }
 
     // Храним для каждой позиции выбранный тип и количество
     private val remainData = mutableMapOf<Int, Pair<InputType?, Int>>() // entityId -> (тип, количество)
 
     fun getRemainData(): Map<Int, Pair<InputType?, Int>> = remainData
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemRemainsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        // Применяем текущий размер шрифта к строке
-        applyFontSize(binding.root, fragment.getPrefs().fontSize)
-        return ViewHolder(binding)
+    override fun getItemViewType(position: Int): Int {
+        return if (items[position] is String) TYPE_HEADER else TYPE_ITEM
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val entity = items[position]
-        holder.bind(entity)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return when (viewType) {
+            TYPE_HEADER -> {
+                val view = TextView(parent.context).apply {
+                    setPadding(32, 16, 16, 8)
+                    setBackgroundColor(0xFFF0F0F0.toInt())
+                    setTextColor(0xFF333333.toInt())
+                }
+                object : RecyclerView.ViewHolder(view) {}
+            }
+            else -> {
+                val binding = ItemRemainsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                applyFontSize(binding.root, fragment.getPrefs().fontSize)
+                EntityViewHolder(binding)
+            }
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val item = items[position]
+        when (holder) {
+            is HeaderViewHolder -> holder.bind(item as String)
+            is EntityViewHolder -> holder.bind(item as MeatEntity)
+        }
     }
 
     override fun getItemCount() = items.size
 
-    inner class ViewHolder(private val binding: ItemRemainsBinding) :
+    // Для повторного использования старого ViewHolder
+    inner class EntityViewHolder(private val binding: ItemRemainsBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(entity: MeatEntity) {
             binding.tvEntity.text = entity.entity
@@ -59,20 +85,18 @@ class RemainsAdapter(
 
         private fun showRemainDialog(entity: MeatEntity) {
             val dialogView = LayoutInflater.from(fragment.requireContext())
-                .inflate(com.example.meatorder.R.layout.dialog_select_form, null)
+                .inflate(R.layout.dialog_select_form, null)
             applyFontSize(dialogView, fragment.getPrefs().fontSize)
 
-            val rgTypes = dialogView.findViewById<RadioGroup>(com.example.meatorder.R.id.rgTypes)
-            val etQuantity = dialogView.findViewById<EditText>(com.example.meatorder.R.id.etQuantity)
+            val rgTypes = dialogView.findViewById<RadioGroup>(R.id.rgTypes)
+            val etQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
 
-            // Добавляем радиокнопки для каждого типа единиц
             for (type in inputTypes) {
                 val rb = RadioButton(fragment.requireContext())
                 rb.text = type.type_name
                 rgTypes.addView(rb)
             }
 
-            // Если ранее был выбран тип, восстанавливаем его
             val currentData = remainData[entity.id]
             if (currentData != null && currentData.first != null) {
                 val index = inputTypes.indexOfFirst { it.type_name == currentData.first!!.type_name }
@@ -113,6 +137,13 @@ class RemainsAdapter(
                 }
             }
             dialog.show()
+        }
+    }
+
+    inner class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        fun bind(title: String) {
+            (itemView as TextView).text = title
+            applyFontSize(itemView, fragment.getPrefs().fontSize, fragment.getPrefs().fontSize + 2)
         }
     }
 }
