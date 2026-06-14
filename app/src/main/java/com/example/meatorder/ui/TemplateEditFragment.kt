@@ -149,41 +149,63 @@ class TemplateEditFragment : Fragment() {
         }
 
         val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
+
         val spinnerEntity = Spinner(requireContext()).apply {
-            adapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, entities.map { it.entity }) {
+            adapter = object : ArrayAdapter<String>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                entities.map { it.entity }
+            ) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                     val view = super.getView(position, convertView, parent) as TextView
                     view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    view.setPadding(10, 10, 10, 10)
                     return view
                 }
                 override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val view = super.getDropDownView(position, convertView, parent) as TextView
-                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    return view
+                    val inflater = LayoutInflater.from(context)
+                    val dropView = inflater.inflate(R.layout.item_spinner_dropdown, parent, false)
+                    val text = dropView.findViewById<TextView>(R.id.text1)
+                    text.text = getItem(position)
+                    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    return dropView
                 }
             }
         }
+
         val spinnerType = Spinner(requireContext()).apply {
-            adapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, inputTypes.map { it.type_name }) {
+            adapter = object : ArrayAdapter<String>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                inputTypes.map { it.type_name }
+            ) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                     val view = super.getView(position, convertView, parent) as TextView
                     view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    view.setPadding(10, 10, 10, 10)
                     return view
                 }
                 override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val view = super.getDropDownView(position, convertView, parent) as TextView
-                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    return view
+                    val inflater = LayoutInflater.from(context)
+                    val dropView = inflater.inflate(R.layout.item_spinner_dropdown, parent, false)
+                    val text = dropView.findViewById<TextView>(R.id.text1)
+                    text.text = getItem(position)
+                    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    return dropView
                 }
             }
         }
+
         val etQuantity = EditText(requireContext()).apply {
             hint = "Количество"
             inputType = android.text.InputType.TYPE_CLASS_NUMBER
         }
 
+        // Добавляем элементы с отступами между ними
         layout.addView(spinnerEntity)
+        layout.addView(Space(requireContext()).apply { minimumHeight = 16 })
         layout.addView(spinnerType)
+        layout.addView(Space(requireContext()).apply { minimumHeight = 16 })
         layout.addView(etQuantity)
         applyFontSize(layout, getPrefs().fontSize)
 
@@ -223,31 +245,47 @@ class TemplateEditFragment : Fragment() {
 
         val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
         val spinnerEntity = Spinner(requireContext()).apply {
-            adapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, entities.map { it.entity }) {
+            adapter = object : ArrayAdapter<String>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                entities.map { it.entity }
+            ) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                     val view = super.getView(position, convertView, parent) as TextView
                     view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    view.setPadding(10, 10, 10, 10)
                     return view
                 }
                 override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val view = super.getDropDownView(position, convertView, parent) as TextView
-                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    return view
+                    val inflater = LayoutInflater.from(context)
+                    val dropView = inflater.inflate(R.layout.item_spinner_dropdown, parent, false)
+                    val text = dropView.findViewById<TextView>(R.id.text1)
+                    text.text = getItem(position)
+                    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    return dropView
                 }
             }
             setSelection(if (currentEntityIndex >= 0) currentEntityIndex else 0)
         }
         val spinnerType = Spinner(requireContext()).apply {
-            adapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, inputTypes.map { it.type_name }) {
+            adapter = object : ArrayAdapter<String>(
+                requireContext(),
+                android.R.layout.simple_spinner_item,
+                inputTypes.map { it.type_name }
+            ) {
                 override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
                     val view = super.getView(position, convertView, parent) as TextView
                     view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    view.setPadding(10, 10, 10, 10)
                     return view
                 }
                 override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                    val view = super.getDropDownView(position, convertView, parent) as TextView
-                    view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                    return view
+                    val inflater = LayoutInflater.from(context)
+                    val dropView = inflater.inflate(R.layout.item_spinner_dropdown, parent, false)
+                    val text = dropView.findViewById<TextView>(R.id.text1)
+                    text.text = getItem(position)
+                    text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                    return dropView
                 }
             }
             setSelection(if (currentTypeIndex >= 0) currentTypeIndex else 0)
@@ -258,7 +296,9 @@ class TemplateEditFragment : Fragment() {
         }
 
         layout.addView(spinnerEntity)
+        layout.addView(Space(requireContext()).apply { minimumHeight = 16 })
         layout.addView(spinnerType)
+        layout.addView(Space(requireContext()).apply { minimumHeight = 16 })
         layout.addView(etQuantity)
         applyFontSize(layout, getPrefs().fontSize)
 
