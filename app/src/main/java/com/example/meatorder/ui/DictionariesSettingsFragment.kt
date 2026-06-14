@@ -58,6 +58,7 @@ class DictionariesSettingsFragment : Fragment() {
         val header = view.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(prefs.headerColor)
+        header?.title = "Настройки справочников"
 
         val containerLayout = view.findViewById<LinearLayout>(R.id.container)
 
