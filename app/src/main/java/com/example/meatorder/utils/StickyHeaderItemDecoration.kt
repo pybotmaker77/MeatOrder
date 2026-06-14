@@ -13,7 +13,7 @@ class StickyHeaderItemDecoration(
     private val backgroundColor: Int = 0xFFF0F0F0.toInt(),
     private val textColor: Int = 0xFF333333.toInt(),
     private val getTextSize: () -> Float,
-    private val textSizeOffset: Float = 20f  // Добавка к базовому размеру
+    private val textSizeOffset: Float = 40f  // Добавка к базовому размеру
 ) : RecyclerView.ItemDecoration() {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
