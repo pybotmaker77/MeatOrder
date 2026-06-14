@@ -12,14 +12,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.meatorder.R
 import com.example.meatorder.data.entity.InputType
 import com.example.meatorder.data.entity.TemplateItem
 import com.example.meatorder.databinding.FragmentOrder2Binding
-import com.example.meatorder.utils.applyFontSize
-import com.example.meatorder.utils.getDao
-import com.example.meatorder.utils.getPrefs
-import com.example.meatorder.utils.showToast
+import com.example.meatorder.utils.*
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -30,6 +28,10 @@ class Order2Fragment : Fragment() {
     private lateinit var adapter: Order2Adapter
     private var allItems = mutableListOf<Order2Item>()
     private var inputTypes = listOf<InputType>()
+
+    // Плоский список для закрепляющихся заголовков (из allItems)
+    private val flatListForHeader: List<Any>
+        get() = allItems.map { it.entity ?: it.group ?: "" }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -87,6 +89,18 @@ class Order2Fragment : Fragment() {
             binding.recyclerOrder2.adapter = adapter
             adapter.submitList(allItems)
 
+            // Добавляем закрепляющиеся заголовки
+            binding.recyclerOrder2.addItemDecoration(
+                StickyHeaderItemDecoration(
+                    getItems = { flatListForHeader },
+                    headerHeight = 120,
+                    backgroundColor = 0xFFF0F0F0.toInt(),
+                    textColor = 0xFF333333.toInt(),
+                    getTextSize = { getPrefs().fontSize.toFloat() },
+                    textSizeOffset = 20f
+                )
+            )
+
             binding.fabSubmit.setOnClickListener {
                 val selected = allItems.filter {
                     it.entity != null && it.selected && it.inputType != null && it.quantity > 0
@@ -118,7 +132,6 @@ class Order2Fragment : Fragment() {
         val rgTypes = dialogView.findViewById<RadioGroup>(R.id.rgTypes)
         val etQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
 
-        // Сначала добавляем RadioButton, потом применяем шрифт
         for (type in inputTypes) {
             val rb = RadioButton(requireContext())
             rb.text = type.type_name
@@ -132,9 +145,7 @@ class Order2Fragment : Fragment() {
         }
         etQuantity.setText(item.quantity.toString())
 
-        applyFontSize(dialogView, getPrefs().fontSize) // теперь RadioButton уже добавлены
-
-        val dialog = AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(requireContext())
             .setTitle("Выберите форму")
             .setView(dialogView)
             .setPositiveButton("Выбрать") { _, _ ->
@@ -155,10 +166,6 @@ class Order2Fragment : Fragment() {
                 adapter.notifyItemChanged(position)
             }
             .show()
-
-        // Шрифт для кнопок
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
     override fun onDestroyView() {
