@@ -95,26 +95,26 @@ class RemainsFragment : Fragment() {
 
         binding.fabContinue.setOnClickListener {
             lifecycleScope.launch {
-                val remainData = adapter.remainData  // прямое обращение к свойству
+                val remainData = adapter.remainData
                 val minOrderItems = getDao().getAllMinOrderItems().first()
 
-                // Рассчитываем заказ
+                // Рассчитываем заказ на основе минимальных норм и введённых остатков
                 val orderList = mutableListOf<Map<String, Any>>()
-                for ((entityId, pair) in remainData) {
-                    val (remainType, remainQty) = pair
-                    if (remainType == null || remainQty == 0) continue
-                    val minItem = minOrderItems.find { it.entity_id == entityId && it.input_type == remainType.type_name }
-                    if (minItem != null) {
-                        val diff = minItem.quantity - remainQty
-                        if (diff > 0) {
-                            orderList.add(mapOf(
-                                "entity_id" to entityId,
-                                "entity" to (entities.find { it.id == entityId }?.entity ?: ""),
-                                "group" to (entities.find { it.id == entityId }?.group ?: ""),
-                                "input_type" to remainType.type_name,
-                                "quantity" to diff
-                            ))
-                        }
+                for (minItem in minOrderItems) {
+                    val entity = entities.find { it.id == minItem.entity_id } ?: continue
+                    val remainPair = remainData[minItem.entity_id]
+                    val remainQty = if (remainPair != null && remainPair.first?.type_name == minItem.input_type) {
+                        remainPair.second
+                    } else 0
+                    val diff = minItem.quantity - remainQty
+                    if (diff > 0) {
+                        orderList.add(mapOf(
+                            "entity_id" to minItem.entity_id,
+                            "entity" to entity.entity,
+                            "group" to entity.group,
+                            "input_type" to minItem.input_type,
+                            "quantity" to diff
+                        ))
                     }
                 }
 
