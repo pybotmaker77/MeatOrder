@@ -49,7 +49,6 @@ class RemainsFragment : Fragment() {
     }
 
     private fun setupList(entities: List<MeatEntity>, inputTypes: List<InputType>) {
-        // Группировка и сортировка
         val grouped = entities.groupBy { it.group }
         val flatList = mutableListOf<Any>()
         val sortedGroups = grouped.keys.sorted()
@@ -59,9 +58,7 @@ class RemainsFragment : Fragment() {
             flatList.addAll(sortedEntities)
         }
 
-        val adapter = RemainsAdapter(this@RemainsFragment, flatList, inputTypes) {
-            // Данные изменились, ничего не делаем
-        }
+        val adapter = RemainsAdapter(this@RemainsFragment, flatList, inputTypes) {}
 
         binding.recyclerRemains.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerRemains.addItemDecoration(
