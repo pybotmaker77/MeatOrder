@@ -121,7 +121,7 @@ class DirectoryEditFragment : Fragment() {
         }
     }
 
-    // ========== Номенклатура с группировкой и кнопкой "Ред." ==========
+    // ========== Номенклатура с закрепляющимися заголовками ==========
     private suspend fun setupEntities(dao: AppDao) {
         dao.getAllEntities().collectLatest { entities ->
             val grouped = entities.groupBy { it.group }
@@ -170,7 +170,7 @@ class DirectoryEditFragment : Fragment() {
                             val btnEdit = holder.itemView.findViewById<Button>(R.id.btnEdit)
 
                             text1.text = entity.entity
-                            text2.text = ""   // убираем "Группа: ..."
+                            text2.text = ""
 
                             btnEdit.setOnClickListener { showEditEntityDialog(entity) }
                             applyFontSize(holder.itemView, getPrefs().fontSize)
@@ -179,9 +179,7 @@ class DirectoryEditFragment : Fragment() {
                                 AlertDialog.Builder(requireContext())
                                     .setTitle("Удалить")
                                     .setMessage("Удалить \"${entity.entity}\"?")
-                                    .setPositiveButton("Да") { _, _ ->
-                                        lifecycleScope.launch { dao.deleteEntity(entity) }
-                                    }
+                                    .setPositiveButton("Да") { _, _ -> lifecycleScope.launch { dao.deleteEntity(entity) } }
                                     .setNegativeButton("Нет", null)
                                     .show()
                                 true
@@ -193,6 +191,16 @@ class DirectoryEditFragment : Fragment() {
                 override fun getItemCount() = flatList.size
             }
             binding.recyclerView.adapter = adapter
+
+            // Закрепляющиеся заголовки групп
+            binding.recyclerView.addItemDecoration(
+                StickyHeaderItemDecoration(
+                    headerHeight = 120,
+                    backgroundColor = 0xFFF0F0F0.toInt(),
+                    textColor = 0xFF333333.toInt(),
+                    textSize = getPrefs().fontSize.toFloat()
+                )
+            )
         }
     }
 
@@ -221,7 +229,7 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // ========== Шаблоны с группировкой и кнопкой "Ред." ==========
+    // ========== Шаблоны ==========
     private suspend fun setupTemplates(dao: AppDao) {
         dao.getAllTemplates().collectLatest { templates ->
             adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -251,7 +259,6 @@ class DirectoryEditFragment : Fragment() {
                         findNavController().navigate(R.id.action_directoryEditFragment_to_templateEditFragment, bundle)
                     }
 
-                    // Долгое нажатие – удаление шаблона с предварительным удалением его элементов
                     holder.itemView.setOnLongClickListener {
                         AlertDialog.Builder(requireContext())
                             .setTitle("Удалить шаблон")
@@ -294,7 +301,7 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // ========== Единицы измерения с кнопкой "Ред." ==========
+    // ========== Единицы измерения ==========
     private suspend fun setupInputTypes(dao: AppDao) {
         dao.getAllInputTypes().collectLatest { inputTypes ->
             adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
