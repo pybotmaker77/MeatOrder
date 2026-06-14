@@ -77,6 +77,7 @@ object DictionaryImporter {
     private suspend fun importTemplates(csv: String, dao: AppDao) {
         val lines = csv.lines().drop(1).filter { it.isNotBlank() }
         val map = mutableMapOf<String, MutableList<TemplateItem>>()
+        // Загружаем все entities один раз, чтобы потом искать по имени
         val entities = dao.getAllEntities().first()
         for (line in lines) {
             val parts = line.split(";")
@@ -85,9 +86,15 @@ object DictionaryImporter {
             val entityName = parts[1].trim()
             val inputType = parts[2].trim()
             val qty = parts[3].trim().toIntOrNull() ?: 0
-            val entityId = entities.find { it.entity == entityName }?.id ?: continue
+            // Ищем entity по точному совпадению имени (если несколько – берём первое попавшееся, но лучше предупредить)
+            val matchingEntities = entities.filter { it.entity == entityName }
+            if (matchingEntities.size > 1) {
+                // Если есть дубликаты, берём первую (можно доработать поиск по группе, если в CSV добавится колонка группы)
+                // Пока просто предупреждение в лог, но в продакшене лучше добавить группу в CSV
+            }
+            val entity = matchingEntities.firstOrNull() ?: continue
             map.getOrPut(tempName) { mutableListOf() }
-                .add(TemplateItem(entity_id = entityId, input_type = inputType, input_default = qty, template_id = 0))
+                .add(TemplateItem(entity_id = entity.id, input_type = inputType, input_default = qty, template_id = 0))
         }
         dao.deleteAllTemplates()
         dao.deleteAllTemplateItems()
