@@ -9,6 +9,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentFontSettingsBinding
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ class FontSettingsFragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        header?.title = "Размер шрифта"
 
         val prefs = getPrefs()
         var currentSize = prefs.fontSize
@@ -42,7 +44,6 @@ class FontSettingsFragment : Fragment() {
             prefs.fontSize = currentSize
             binding.tvCurrentSize.text = "${currentSize}sp"
             binding.tvPreview.textSize = currentSize.toFloat()
-            // Применяем ко всем экранам
             requireActivity().recreate()
         }
 
