@@ -47,7 +47,6 @@ class Order2Adapter(
                 EntityViewHolder(b)
             }
         }
-        // Применяем размер шрифта
         applyFontSize(holder.itemView, fragment.getPrefs().fontSize)
         return holder
     }
@@ -67,29 +66,26 @@ class Order2Adapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(item: Order2Item) {
             binding.tvEntity.text = item.entity?.entity
-            binding.checkbox.isChecked = item.selected
 
-            if (item.selected && (item.inputType == null || item.quantity == 0)) {
+            // Отображение сводки
+            if (item.selected && item.inputType != null && item.quantity > 0) {
+                binding.tvSummary.text = "${item.quantity} ${item.inputType!!.short_name}"
+                binding.tvSummary.visibility = View.VISIBLE
+                binding.root.setBackgroundColor(0x55339933.toInt()) // полупрозрачный салатовый
+            } else if (item.selected) {
+                binding.tvSummary.visibility = View.GONE
                 binding.root.setBackgroundColor(ContextCompat.getColor(binding.root.context, R.color.yellow_highlight))
             } else {
+                binding.tvSummary.visibility = View.GONE
                 binding.root.setBackgroundColor(ContextCompat.getColor(binding.root.context, android.R.color.white))
             }
 
-            binding.root.setOnClickListener {
+            binding.btnAdd.setOnClickListener {
                 if (!item.selected) {
                     item.selected = true
-                    binding.checkbox.isChecked = true
-                    onEntityClick(item, adapterPosition)
-                } else {
-                    onEntityClick(item, adapterPosition)
+                    notifyItemChanged(adapterPosition)
                 }
-            }
-
-            if (item.inputType != null && item.quantity > 0) {
-                binding.tvSummary.text = "${item.quantity} ${item.inputType!!.short_name}"
-                binding.tvSummary.visibility = View.VISIBLE
-            } else {
-                binding.tvSummary.visibility = View.GONE
+                onEntityClick(item, adapterPosition)
             }
         }
     }
