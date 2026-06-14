@@ -53,6 +53,7 @@ class Order2Fragment : Fragment() {
         val args = arguments
         val byBalance = args?.getBoolean("byBalance", false) ?: false
         val templateIds = args?.getIntArray("templateIds")?.toList() ?: emptyList()
+        val preSelectedIds = args?.getIntArray("preSelectedIds")?.toList() ?: emptyList()
         val initialItemsJson = args?.getString("initialItemsJson")
 
         lifecycleScope.launch {
@@ -64,16 +65,20 @@ class Order2Fragment : Fragment() {
                 templateItems.addAll(items)
             }
 
-            // Предзаполнение из initialItemsJson (для остатков)
+            // Разбираем initialItemsJson (результат расчёта из остатков)
             val initialMap = mutableMapOf<Int, Pair<String, Int>>() // entityId -> (input_type, quantity)
             if (!initialItemsJson.isNullOrEmpty()) {
-                val type = object : TypeToken<List<Map<String, Any>>>() {}.type
-                val list: List<Map<String, Any>> = Gson().fromJson(initialItemsJson, type)
-                for (item in list) {
-                    val entityId = (item["entity_id"] as Double).toInt()
-                    val inputType = item["input_type"] as String
-                    val quantity = (item["quantity"] as Double).toInt()
-                    initialMap[entityId] = Pair(inputType, quantity)
+                try {
+                    val type = object : TypeToken<List<Map<String, Any>>>() {}.type
+                    val list: List<Map<String, Any>> = Gson().fromJson(initialItemsJson, type)
+                    for (item in list) {
+                        val entityId = (item["entity_id"] as Double).toInt()
+                        val inputType = item["input_type"] as String
+                        val quantity = (item["quantity"] as Double).toInt()
+                        initialMap[entityId] = Pair(inputType, quantity)
+                    }
+                } catch (e: Exception) {
+                    // если JSON не распарсился, просто игнорируем
                 }
             }
 
@@ -84,9 +89,12 @@ class Order2Fragment : Fragment() {
                 for (ent in ents) {
                     val templateItem = templateItems.find { it.entity_id == ent.id }
                     val initial = initialMap[ent.id]
-                    val selected = if (initial != null) true
-                        else if (byBalance) false
-                        else templateItem != null
+                    // Позиция выбрана, если есть в initialMap ИЛИ если это обычный заказ с шаблоном
+                    val selected = when {
+                        initial != null -> true
+                        byBalance && ent.id in preSelectedIds -> true
+                        else -> templateItem != null
+                    }
                     val item = Order2Item(
                         entity = ent,
                         group = group,
@@ -143,6 +151,8 @@ class Order2Fragment : Fragment() {
 
     private fun showSelectFormDialog(item: Order2Item, position: Int) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_select_form, null)
+        applyFontSize(dialogView, getPrefs().fontSize)
+
         val rgTypes = dialogView.findViewById<RadioGroup>(R.id.rgTypes)
         val etQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
 
@@ -173,13 +183,32 @@ class Order2Fragment : Fragment() {
                     adapter.notifyItemChanged(position)
                 }
             }
-            .setNegativeButton("Отмена") { _, _ ->
+            .setNeutralButton("Удалить") { _, _ ->
                 item.selected = false
                 item.inputType = null
                 item.quantity = 0
                 adapter.notifyItemChanged(position)
             }
-            .show()
+            .setNegativeButton("Отмена", null)
+            .create()
+
+        dialog.setOnShowListener { dialogInterface ->
+            (dialogInterface as? AlertDialog)?.let {
+                it.window?.decorView?.let { rootView ->
+                    applyFontSize(rootView, getPrefs().fontSize)
+                }
+                it.getButton(AlertDialog.BUTTON_POSITIVE)?.let { btn ->
+                    applyFontSize(btn, getPrefs().fontSize)
+                }
+                it.getButton(AlertDialog.BUTTON_NEUTRAL)?.let { btn ->
+                    applyFontSize(btn, getPrefs().fontSize)
+                }
+                it.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { btn ->
+                    applyFontSize(btn, getPrefs().fontSize)
+                }
+            }
+        }
+        dialog.show()
     }
 
     override fun onDestroyView() {
