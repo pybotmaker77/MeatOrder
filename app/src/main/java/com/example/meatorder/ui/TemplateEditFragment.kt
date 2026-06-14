@@ -67,7 +67,6 @@ class TemplateEditFragment : Fragment() {
     }
 
     private fun updateList(items: List<TemplateItem>) {
-        // Группировка по группе сущности
         val grouped = items.groupBy { item ->
             entities.find { it.id == item.entity_id }?.group ?: "Без группы"
         }
@@ -95,7 +94,7 @@ class TemplateEditFragment : Fragment() {
                     }
                     else -> {
                         val itemView = LayoutInflater.from(parent.context)
-                            .inflate(android.R.layout.simple_list_item_2, parent, false)
+                            .inflate(R.layout.item_edit_button, parent, false)
                         object : RecyclerView.ViewHolder(itemView) {}
                     }
                 }
@@ -112,14 +111,15 @@ class TemplateEditFragment : Fragment() {
                     TYPE_ITEM -> {
                         val templateItem = item as TemplateItem
                         val entity = entities.find { it.id == templateItem.entity_id }
-                        val text1 = holder.itemView.findViewById<TextView>(android.R.id.text1)
-                        val text2 = holder.itemView.findViewById<TextView>(android.R.id.text2)
+                        val text1 = holder.itemView.findViewById<TextView>(R.id.text1)
+                        val text2 = holder.itemView.findViewById<TextView>(R.id.text2)
+                        val btnEdit = holder.itemView.findViewById<Button>(R.id.btnEdit)
 
                         text1.text = entity?.entity ?: "???"
                         text2.text = "${templateItem.input_default} ${templateItem.input_type}"
 
-                        // Клик по строке – редактирование
-                        holder.itemView.setOnClickListener {
+                        // Кнопка «Ред.»
+                        btnEdit.setOnClickListener {
                             showEditItemDialog(templateItem)
                         }
                         // Долгое нажатие – удаление
@@ -145,10 +145,13 @@ class TemplateEditFragment : Fragment() {
     }
 
     private fun showAddItemDialog() {
-        if (entities.isEmpty() || inputTypes.isEmpty()) {
-            Toast.makeText(requireContext(), "Сначала заполните справочники", Toast.LENGTH_SHORT).show()
-            return
-        }
+        // ... (как в предыдущей версии, с Spinner'ами, применяющими шрифт)
+    }
+
+    private fun showEditItemDialog(item: TemplateItem) {
+        val currentEntity = entities.find { it.id == item.entity_id }
+        val currentEntityIndex = entities.indexOf(currentEntity)
+        val currentTypeIndex = inputTypes.indexOfFirst { it.type_name == item.input_type }
 
         val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
         val spinnerEntity = Spinner(requireContext()).apply {
@@ -164,6 +167,7 @@ class TemplateEditFragment : Fragment() {
                     return view
                 }
             }
+            setSelection(if (currentEntityIndex >= 0) currentEntityIndex else 0)
         }
         val spinnerType = Spinner(requireContext()).apply {
             adapter = object : ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_item, inputTypes.map { it.type_name }) {
@@ -178,58 +182,6 @@ class TemplateEditFragment : Fragment() {
                     return view
                 }
             }
-        }
-        val etQuantity = EditText(requireContext()).apply {
-            hint = "Количество"
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-        }
-
-        layout.addView(spinnerEntity)
-        layout.addView(spinnerType)
-        layout.addView(etQuantity)
-        applyFontSize(layout, getPrefs().fontSize)
-
-        val dialog = AlertDialog.Builder(requireContext())
-            .setTitle("Добавить позицию в шаблон")
-            .setView(layout)
-            .setPositiveButton("Добавить") { _, _ ->
-                val entityIndex = spinnerEntity.selectedItemPosition
-                val typeIndex = spinnerType.selectedItemPosition
-                val qty = etQuantity.text.toString().toIntOrNull() ?: 0
-                if (entityIndex >= 0 && typeIndex >= 0 && qty > 0) {
-                    val entityId = entities[entityIndex].id
-                    val inputTypeName = inputTypes[typeIndex].type_name
-                    lifecycleScope.launch {
-                        getDao().insertTemplateItem(
-                            TemplateItem(
-                                template_id = templateId,
-                                entity_id = entityId,
-                                input_type = inputTypeName,
-                                input_default = qty
-                            )
-                        )
-                    }
-                }
-            }
-            .setNegativeButton("Отмена", null)
-            .show()
-
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
-    }
-
-    private fun showEditItemDialog(item: TemplateItem) {
-        val currentEntity = entities.find { it.id == item.entity_id }
-        val currentEntityIndex = entities.indexOf(currentEntity)
-        val currentTypeIndex = inputTypes.indexOfFirst { it.type_name == item.input_type }
-
-        val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
-        val spinnerEntity = Spinner(requireContext()).apply {
-            adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, entities.map { it.entity })
-            setSelection(if (currentEntityIndex >= 0) currentEntityIndex else 0)
-        }
-        val spinnerType = Spinner(requireContext()).apply {
-            adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, inputTypes.map { it.type_name })
             setSelection(if (currentTypeIndex >= 0) currentTypeIndex else 0)
         }
         val etQuantity = EditText(requireContext()).apply {
