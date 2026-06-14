@@ -192,9 +192,10 @@ class DirectoryEditFragment : Fragment() {
             }
             binding.recyclerView.adapter = adapter
 
-            // Закрепляющиеся заголовки групп
+            // Закрепляющиеся заголовки – передаём flatList напрямую
             binding.recyclerView.addItemDecoration(
                 StickyHeaderItemDecoration(
+                    items = flatList,
                     headerHeight = 120,
                     backgroundColor = 0xFFF0F0F0.toInt(),
                     textColor = 0xFF333333.toInt(),
