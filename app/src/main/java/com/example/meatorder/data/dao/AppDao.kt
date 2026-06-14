@@ -98,4 +98,20 @@ interface AppDao {
 
     @Query("DELETE FROM input_types")
     suspend fun deleteAllInputTypes()
+
+    // Минимальный заказ
+    @Query("SELECT * FROM min_order_items")
+    fun getAllMinOrderItems(): Flow<List<MinOrderItem>>
+
+    @Insert
+    suspend fun insertMinOrderItem(item: MinOrderItem)
+
+    @Update
+    suspend fun updateMinOrderItem(item: MinOrderItem)
+
+    @Delete
+    suspend fun deleteMinOrderItem(item: MinOrderItem)
+
+    @Query("DELETE FROM min_order_items")
+    suspend fun deleteAllMinOrderItems()
 }
