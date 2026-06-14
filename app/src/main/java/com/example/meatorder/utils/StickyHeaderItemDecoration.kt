@@ -8,11 +8,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class StickyHeaderItemDecoration(
-    private val items: List<Any>,           // плоский список, где строки — это заголовки
+    private val items: List<Any>,
     private val headerHeight: Int = 120,
     private val backgroundColor: Int = 0xFFF0F0F0.toInt(),
     private val textColor: Int = 0xFF333333.toInt(),
-    private val textSize: Float = 16f
+    private val getTextSize: () -> Float      // лямбда, возвращающая актуальный размер шрифта
 ) : RecyclerView.ItemDecoration() {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -21,18 +21,19 @@ class StickyHeaderItemDecoration(
     }
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = textColor
-        this.textSize = this@StickyHeaderItemDecoration.textSize
         isFakeBoldText = true
     }
 
     override fun onDrawOver(c: Canvas, parent: RecyclerView, state: RecyclerView.State) {
         super.onDrawOver(c, parent, state)
 
+        // Получаем свежий размер шрифта
+        textPaint.textSize = getTextSize()
+
         val layoutManager = parent.layoutManager as? LinearLayoutManager ?: return
         val firstVisiblePos = layoutManager.findFirstVisibleItemPosition()
         if (firstVisiblePos == RecyclerView.NO_POSITION || items.isEmpty()) return
 
-        // Найти ближайший заголовок (String) сверху
         var headerPos = firstVisiblePos
         while (headerPos >= 0 && items[headerPos] !is String) {
             headerPos--
@@ -41,7 +42,6 @@ class StickyHeaderItemDecoration(
 
         val title = items[headerPos] as String
 
-        // Вычислить смещение, чтобы заголовок выталкивался следующим
         var offsetY = 0
         val nextHeaderPos = findNextHeader(headerPos)
         if (nextHeaderPos != -1) {
@@ -54,7 +54,6 @@ class StickyHeaderItemDecoration(
             }
         }
 
-        // Рисуем фон и текст
         c.drawRect(0f, offsetY.toFloat(), parent.width.toFloat(), (offsetY + headerHeight).toFloat(), paint)
 
         val textX = 32f
@@ -70,6 +69,6 @@ class StickyHeaderItemDecoration(
     }
 
     override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
-        // Не добавляем отступов
+        // без изменений
     }
 }
