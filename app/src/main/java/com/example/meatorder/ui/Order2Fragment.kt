@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -78,7 +79,7 @@ class Order2Fragment : Fragment() {
                         initialMap[entityId] = Pair(inputType, quantity)
                     }
                 } catch (e: Exception) {
-                    // если JSON не распарсился, просто игнорируем
+                    Toast.makeText(requireContext(), "Ошибка загрузки расчёта: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
 
@@ -89,7 +90,6 @@ class Order2Fragment : Fragment() {
                 for (ent in ents) {
                     val templateItem = templateItems.find { it.entity_id == ent.id }
                     val initial = initialMap[ent.id]
-                    // Позиция выбрана, если есть в initialMap ИЛИ если это обычный заказ с шаблоном
                     val selected = when {
                         initial != null -> true
                         byBalance && ent.id in preSelectedIds -> true
