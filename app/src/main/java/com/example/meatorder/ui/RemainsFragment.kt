@@ -13,15 +13,16 @@ import com.example.meatorder.R
 import com.example.meatorder.data.entity.InputType
 import com.example.meatorder.data.entity.MeatEntity
 import com.example.meatorder.databinding.FragmentRemainsBinding
-import com.example.meatorder.utils.applyFontSize
-import com.example.meatorder.utils.getDao
-import com.example.meatorder.utils.getPrefs
+import com.example.meatorder.utils.*
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class RemainsFragment : Fragment() {
     private var _binding: FragmentRemainsBinding? = null
     private val binding get() = _binding!!
+
+    // Поле для хранения плоского списка (заголовки + позиции)
+    private var flatList = listOf<Any>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,13 +51,14 @@ class RemainsFragment : Fragment() {
 
     private fun setupList(entities: List<MeatEntity>, inputTypes: List<InputType>) {
         val grouped = entities.groupBy { it.group }
-        val flatList = mutableListOf<Any>()
+        val newFlatList = mutableListOf<Any>()
         val sortedGroups = grouped.keys.sorted()
         for (group in sortedGroups) {
-            flatList.add(group)
+            newFlatList.add(group)
             val sortedEntities = grouped[group]!!.sortedBy { it.entity }
-            flatList.addAll(sortedEntities)
+            newFlatList.addAll(sortedEntities)
         }
+        flatList = newFlatList
 
         val adapter = RemainsAdapter(this@RemainsFragment, flatList, inputTypes) {}
 
@@ -72,6 +74,17 @@ class RemainsFragment : Fragment() {
                     outRect.bottom = 1
                 }
             }
+        )
+        // Добавляем закрепляющиеся заголовки
+        binding.recyclerRemains.addItemDecoration(
+            StickyHeaderItemDecoration(
+                getItems = { flatList },
+                headerHeight = 120,
+                backgroundColor = 0xFFF0F0F0.toInt(),
+                textColor = 0xFF333333.toInt(),
+                getTextSize = { getPrefs().fontSize.toFloat() },
+                textSizeOffset = 20f
+            )
         )
         binding.recyclerRemains.adapter = adapter
 
