@@ -56,7 +56,15 @@ class Order2Fragment : Fragment() {
         val byBalance = args?.getBoolean("byBalance", false) ?: false
         val templateIds = args?.getIntArray("templateIds")?.toList() ?: emptyList()
         val preSelectedIds = args?.getIntArray("preSelectedIds")?.toList() ?: emptyList()
-        val initialItemsJson = args?.getString("initialItemsJson")
+        var initialItemsJson = args?.getString("initialItemsJson")
+
+        // Если initialItemsJson не передан, но есть черновик, восстанавливаем его
+        if (initialItemsJson.isNullOrEmpty()) {
+            val draft = getPrefs().draftOrderJson
+            if (!draft.isNullOrEmpty()) {
+                initialItemsJson = draft
+            }
+        }
 
         lifecycleScope.launch {
             inputTypes = dao.getAllInputTypes().first()
