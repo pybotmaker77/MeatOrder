@@ -33,6 +33,10 @@ class PreferencesHelper(context: Context) {
         get() = prefs.getString("draft_order", null)
         set(value) = prefs.edit().putString("draft_order", value).apply()
 
+    var dictionariesFolderUri: String?
+        get() = prefs.getString("dictionaries_folder_uri", null)
+        set(value) = prefs.edit().putString("dictionaries_folder_uri", value).apply()
+
     fun saveDraft(orderJson: String) {
         draftOrderJson = orderJson
     }
