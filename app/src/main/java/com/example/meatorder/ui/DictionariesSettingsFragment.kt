@@ -55,7 +55,6 @@ class DictionariesSettingsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Инициализируем dao и prefs, когда фрагмент уже присоединён
         dao = getDao()
         prefs = getPrefs()
 
@@ -87,9 +86,17 @@ class DictionariesSettingsFragment : Fragment() {
     private fun exportFiles() {
         lifecycleScope.launch {
             try {
+                // Получаем данные до создания ZIP, чтобы избежать проблем с контекстом
+                val entities = dao.getAllEntities().first()
+                val inputTypes = dao.getAllInputTypes().first()
+                val templates = dao.getAllTemplates().first()
+                val templateItemsMap = mutableMapOf<Int, List<TemplateItem>>()
+                for (t in templates) {
+                    templateItemsMap[t.id] = dao.getTemplateItems(t.id).first()
+                }
+
                 val zipFile = File(requireContext().cacheDir, "справочники.zip")
                 ZipOutputStream(FileOutputStream(zipFile)).use { zos ->
-                    val entities = dao.getAllEntities().first()
                     zos.putNextEntry(ZipEntry("entities.csv"))
                     zos.write("entity;group\n".toByteArray())
                     for (e in entities) {
@@ -97,7 +104,6 @@ class DictionariesSettingsFragment : Fragment() {
                     }
                     zos.closeEntry()
 
-                    val inputTypes = dao.getAllInputTypes().first()
                     zos.putNextEntry(ZipEntry("input_types.csv"))
                     zos.write("type_name;short_name;weight_kg\n".toByteArray())
                     for (t in inputTypes) {
@@ -105,11 +111,10 @@ class DictionariesSettingsFragment : Fragment() {
                     }
                     zos.closeEntry()
 
-                    val templates = dao.getAllTemplates().first()
                     zos.putNextEntry(ZipEntry("templates.csv"))
                     zos.write("temp;entity;input_type;input_default\n".toByteArray())
                     for (t in templates) {
-                        val items = dao.getTemplateItems(t.id).first()
+                        val items = templateItemsMap[t.id] ?: emptyList()
                         for (item in items) {
                             val entity = entities.find { it.id == item.entity_id }?.entity ?: ""
                             zos.write("${t.temp};$entity;${item.input_type};${item.input_default}\n".toByteArray())
