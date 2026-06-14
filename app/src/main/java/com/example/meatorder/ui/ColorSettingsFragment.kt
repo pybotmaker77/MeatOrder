@@ -1,6 +1,5 @@
 package com.example.meatorder.ui
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -9,18 +8,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentColorSettingsBinding
-import com.example.meatorder.utils.PreferencesHelper
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getPrefs
 
 class ColorSettingsFragment : Fragment() {
     private var _binding: FragmentColorSettingsBinding? = null
     private val binding get() = _binding!!
 
-    // Лаунчер для выбора изображения фона
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
@@ -30,17 +29,10 @@ class ColorSettingsFragment : Fragment() {
         }
     }
 
-    // Палитра доступных цветов
     private val colorPalette = arrayOf(
         Color.BLACK, Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW,
         Color.MAGENTA, Color.CYAN, Color.GRAY, Color.DKGRAY, Color.LTGRAY,
         Color.WHITE, Color.parseColor("#FFA500"), Color.parseColor("#800080"), Color.parseColor("#A52A2A")
-    )
-
-    private val colorNames = arrayOf(
-        "Чёрный", "Красный", "Синий", "Зелёный", "Жёлтый",
-        "Пурпурный", "Голубой", "Серый", "Тёмно-серый", "Светло-серый",
-        "Белый", "Оранжевый", "Фиолетовый", "Коричневый"
     )
 
     override fun onCreateView(
@@ -57,6 +49,7 @@ class ColorSettingsFragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        header?.title = "Цвета темы"
 
         val prefs = getPrefs()
         updateColorLabel(prefs.headerColor)
@@ -129,7 +122,7 @@ class ColorSettingsFragment : Fragment() {
                 val newColor = colorPalette[position]
                 prefs.headerColor = newColor
                 updateColorLabel(newColor)
-                requireActivity().recreate() // мгновенное применение
+                requireActivity().recreate()
             }
         }
 
