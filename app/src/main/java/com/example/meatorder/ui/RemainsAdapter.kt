@@ -20,15 +20,17 @@ class RemainsAdapter(
     private val fragment: androidx.fragment.app.Fragment,
     private val items: List<Any>,
     private val inputTypes: List<InputType>,
-    private val onDataChanged: () -> Unit
+    private val onDataChanged: () -> Unit,
+    private val highlight: Boolean = true,
+    private val remainData: MutableMap<Int, Pair<InputType?, Int>> = mutableMapOf(),
+    private val onSave: ((entityId: Int, type: InputType, qty: Int) -> Unit)? = null,
+    private val onDelete: ((entityId: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         private const val TYPE_HEADER = 0
         private const val TYPE_ITEM = 1
     }
-
-    private val remainData = mutableMapOf<Int, Pair<InputType?, Int>>()
 
     fun getRemainData(): Map<Int, Pair<InputType?, Int>> = remainData
 
@@ -76,7 +78,11 @@ class RemainsAdapter(
             if (data != null && data.second > 0 && data.first != null) {
                 binding.tvRemainSummary.text = "${data.second} ${data.first!!.short_name}"
                 binding.tvRemainSummary.visibility = View.VISIBLE
-                binding.root.setBackgroundColor(0x55339933.toInt())
+                if (highlight) {
+                    binding.root.setBackgroundColor(0x55339933.toInt())
+                } else {
+                    binding.root.setBackgroundColor(android.graphics.Color.WHITE)
+                }
             } else {
                 binding.tvRemainSummary.visibility = View.GONE
                 binding.root.setBackgroundColor(android.graphics.Color.WHITE)
@@ -120,12 +126,14 @@ class RemainsAdapter(
                         val selectedType = inputTypes[selectedIndex]
                         val qty = etQuantity.text.toString().toIntOrNull() ?: 0
                         remainData[entity.id] = Pair(selectedType, qty)
+                        onSave?.invoke(entity.id, selectedType, qty)
                         notifyItemChanged(adapterPosition)
                         onDataChanged()
                     }
                 }
                 .setNeutralButton("Удалить") { _, _ ->
                     remainData.remove(entity.id)
+                    onDelete?.invoke(entity.id)
                     notifyItemChanged(adapterPosition)
                     onDataChanged()
                 }
