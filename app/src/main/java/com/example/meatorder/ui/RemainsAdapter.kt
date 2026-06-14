@@ -18,11 +18,11 @@ import com.example.meatorder.utils.getPrefs
 
 class RemainsAdapter(
     private val fragment: androidx.fragment.app.Fragment,
-    private val items: List<Any>,
+    private var items: List<Any>,               // String (заголовок) или MeatEntity
     private val inputTypes: List<InputType>,
     private val onDataChanged: () -> Unit,
     private val highlight: Boolean = true,
-    private val remainData: MutableMap<Int, Pair<InputType?, Int>> = mutableMapOf(),
+    var remainData: MutableMap<Int, Pair<InputType?, Int>> = mutableMapOf(),
     private val onSave: ((entityId: Int, type: InputType, qty: Int) -> Unit)? = null,
     private val onDelete: ((entityId: Int) -> Unit)? = null
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -33,6 +33,14 @@ class RemainsAdapter(
     }
 
     fun getRemainData(): Map<Int, Pair<InputType?, Int>> = remainData
+
+    /** Обновляет данные без пересоздания адаптера – сохраняет позицию прокрутки */
+    fun updateData(newItems: List<Any>, newRemainData: Map<Int, Pair<InputType?, Int>>) {
+        items = newItems
+        remainData.clear()
+        remainData.putAll(newRemainData)
+        notifyDataSetChanged()
+    }
 
     override fun getItemViewType(position: Int): Int {
         return if (items[position] is String) TYPE_HEADER else TYPE_ITEM
