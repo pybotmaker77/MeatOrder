@@ -35,6 +35,9 @@
         <action
             android:id="@+id/action_order1Fragment_to_directoriesFragment"
             app:destination="@id/directoriesFragment" />
+        <action
+            android:id="@+id/action_order1Fragment_to_directoryEditFragment"
+            app:destination="@id/directoryEditFragment" />
     </fragment>
 
     <fragment
