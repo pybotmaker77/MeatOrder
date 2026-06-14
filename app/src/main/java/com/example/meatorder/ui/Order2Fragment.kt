@@ -29,7 +29,6 @@ class Order2Fragment : Fragment() {
     private var allItems = mutableListOf<Order2Item>()
     private var inputTypes = listOf<InputType>()
 
-    // Плоский список для закрепляющихся заголовков (из allItems)
     private val flatListForHeader: List<Any>
         get() = allItems.map { it.entity ?: it.group ?: "" }
 
@@ -86,10 +85,6 @@ class Order2Fragment : Fragment() {
                 showSelectFormDialog(item, position)
             }, inputTypes)
             binding.recyclerOrder2.layoutManager = LinearLayoutManager(requireContext())
-            binding.recyclerOrder2.adapter = adapter
-            adapter.submitList(allItems)
-
-            // Добавляем закрепляющиеся заголовки
             binding.recyclerOrder2.addItemDecoration(
                 StickyHeaderItemDecoration(
                     getItems = { flatListForHeader },
@@ -100,6 +95,8 @@ class Order2Fragment : Fragment() {
                     textSizeOffset = 20f
                 )
             )
+            binding.recyclerOrder2.adapter = adapter
+            adapter.submitList(allItems)
 
             binding.fabSubmit.setOnClickListener {
                 val selected = allItems.filter {
@@ -129,6 +126,8 @@ class Order2Fragment : Fragment() {
 
     private fun showSelectFormDialog(item: Order2Item, position: Int) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_select_form, null)
+        applyFontSize(dialogView, getPrefs().fontSize)
+
         val rgTypes = dialogView.findViewById<RadioGroup>(R.id.rgTypes)
         val etQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
 
@@ -145,7 +144,7 @@ class Order2Fragment : Fragment() {
         }
         etQuantity.setText(item.quantity.toString())
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Выберите форму")
             .setView(dialogView)
             .setPositiveButton("Выбрать") { _, _ ->
@@ -159,13 +158,32 @@ class Order2Fragment : Fragment() {
                     adapter.notifyItemChanged(position)
                 }
             }
-            .setNegativeButton("Отмена") { _, _ ->
+            .setNeutralButton("Удалить") { _, _ ->
                 item.selected = false
                 item.inputType = null
                 item.quantity = 0
                 adapter.notifyItemChanged(position)
             }
-            .show()
+            .setNegativeButton("Отмена", null)
+            .create()
+
+        dialog.setOnShowListener { dialogInterface ->
+            (dialogInterface as? AlertDialog)?.let {
+                it.window?.decorView?.let { rootView ->
+                    applyFontSize(rootView, getPrefs().fontSize)
+                }
+                it.getButton(AlertDialog.BUTTON_POSITIVE)?.let { btn ->
+                    applyFontSize(btn, getPrefs().fontSize)
+                }
+                it.getButton(AlertDialog.BUTTON_NEUTRAL)?.let { btn ->
+                    applyFontSize(btn, getPrefs().fontSize)
+                }
+                it.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { btn ->
+                    applyFontSize(btn, getPrefs().fontSize)
+                }
+            }
+        }
+        dialog.show()
     }
 
     override fun onDestroyView() {
