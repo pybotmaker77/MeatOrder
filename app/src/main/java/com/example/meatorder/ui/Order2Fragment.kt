@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.RadioGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -67,7 +66,7 @@ class Order2Fragment : Fragment() {
             }
 
             // Разбираем initialItemsJson (результат расчёта из остатков)
-            val initialMap = mutableMapOf<Int, Pair<String, Int>>() // entityId -> (input_type, quantity)
+            val initialMap = mutableMapOf<Int, Pair<String, Int>>()
             if (!initialItemsJson.isNullOrEmpty()) {
                 try {
                     val type = object : TypeToken<List<Map<String, Any>>>() {}.type
@@ -79,11 +78,13 @@ class Order2Fragment : Fragment() {
                         initialMap[entityId] = Pair(inputType, quantity)
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Ошибка загрузки расчёта: ${e.message}", Toast.LENGTH_LONG).show()
+                    // игнорируем
                 }
             }
 
-            val grouped = entities.groupBy { it.group }
+            // Сортируем сущности по group, затем по entity
+            val sortedEntities = entities.sortedWith(compareBy<MeatEntity> { it.group }.thenBy { it.entity })
+            val grouped = sortedEntities.groupBy { it.group }
             val list = mutableListOf<Order2Item>()
             for ((group, ents) in grouped) {
                 list.add(Order2Item(entity = null, group = group))
