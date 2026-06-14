@@ -50,25 +50,38 @@ class Order4Fragment : Fragment() {
         lifecycleScope.launch {
             val inputTypes = getDao().getAllInputTypes().first()
             val activePattern = getDao().getAllPatterns().first().find { it.is_active }
-            val patternStr = activePattern?.template ?: "- {entity} - {input} {input_type_short}.\n{summary}"
+            val patternStr = activePattern?.template ?: "- {entity} - {input} {input_type_short}."
+
+            // Группировка и сортировка
+            val grouped = items.groupBy { it["group"] as String }
+            val sortedGroups = grouped.keys.sorted() // группы по алфавиту
             val sb = StringBuilder()
 
-            for (item in items) {
-                val entity = item["entity"] as String
-                val quantity = (item["quantity"] as Double).toInt()
-                val inputTypeName = item["input_type"] as String
-                val inputType = inputTypes.find { it.type_name == inputTypeName }
-                val shortName = inputType?.short_name ?: inputTypeName
+            for (group in sortedGroups) {
+                sb.appendLine(group) // заголовок группы
+                val groupItems = grouped[group]!!.sortedByDescending { (it["quantity"] as Double).toInt() }
+                for (item in groupItems) {
+                    val entity = item["entity"] as String
+                    val quantity = (item["quantity"] as Double).toInt()
+                    val inputTypeName = item["input_type"] as String
+                    val inputType = inputTypes.find { it.type_name == inputTypeName }
+                    val shortName = inputType?.short_name ?: inputTypeName
 
-                val line = patternStr
-                    .replace("{entity}", entity)
-                    .replace("{input}", quantity.toString())
-                    .replace("{input_type}", inputTypeName)
-                    .replace("{input_type_short}", shortName)
-                    .replace("{summary}", "")
-                sb.appendLine(line)
+                    val line = patternStr
+                        .replace("{entity}", entity)
+                        .replace("{input}", quantity.toString())
+                        .replace("{input_type}", inputTypeName)
+                        .replace("{input_type_short}", shortName)
+                        .replace("{summary}", "")
+                    sb.appendLine(line)
+                }
+                sb.appendLine() // пустая строка между группами
             }
 
+            // Убираем последнюю пустую строку
+            val textWithoutSummary = sb.toString().trimEnd()
+
+            // Сводка
             val blocks = items.filter { it["input_type"] == "Блок" }.sumOf { (it["quantity"] as Double).toInt() }
             val bags = items.filter { it["input_type"] == "Мешок" }.sumOf { (it["quantity"] as Double).toInt() }
             val kg = items.filter { it["input_type"] == "Кг" }.sumOf { (it["quantity"] as Double).toInt() }
@@ -77,11 +90,12 @@ class Order4Fragment : Fragment() {
                 (it["quantity"] as Double).toInt() * type
             }
             val summary = "Итого: Блоков: $blocks | Мешков: $bags | Кг: $kg\nОбщий вес: $totalWeight кг"
+
             val finalText = if (patternStr.contains("{summary}")) {
-                sb.toString().replace("{summary}", summary)
+                textWithoutSummary.replace("{summary}", summary)
             } else {
-                sb.appendLine().appendLine(summary).toString()
-            }.trimEnd()
+                "$textWithoutSummary\n\n$summary"
+            }
 
             binding.tvFinalText.text = finalText
 
