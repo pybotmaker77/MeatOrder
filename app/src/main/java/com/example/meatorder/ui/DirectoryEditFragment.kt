@@ -219,72 +219,38 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // ========== Шаблоны (с группировкой по первой букве) ==========
+    // ========== Шаблоны (без группировки) ==========
     private suspend fun setupTemplates(dao: AppDao) {
         dao.getAllTemplates().collectLatest { templates ->
-            val grouped = templates.groupBy { it.temp.firstOrNull()?.uppercase() ?: "#" }
-            val flatList = mutableListOf<Any>()
-            for ((letter, list) in grouped) {
-                flatList.add(letter)
-                flatList.addAll(list)
-            }
-
             adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-
-                override fun getItemViewType(position: Int): Int {
-                    return if (flatList[position] is String) TYPE_HEADER else TYPE_ITEM
-                }
-
                 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                    return when (viewType) {
-                        TYPE_HEADER -> {
-                            val view = TextView(parent.context).apply {
-                                setPadding(32, 16, 16, 8)
-                                setBackgroundColor(0xFFF0F0F0.toInt())
-                                setTextColor(0xFF333333.toInt())
-                            }
-                            object : RecyclerView.ViewHolder(view) {}
-                        }
-                        else -> {
-                            val itemView = LayoutInflater.from(parent.context)
-                                .inflate(R.layout.item_edit_button, parent, false)
-                            object : RecyclerView.ViewHolder(itemView) {}
-                        }
-                    }
+                    val itemView = LayoutInflater.from(parent.context)
+                        .inflate(R.layout.item_edit_button, parent, false)
+                    return object : RecyclerView.ViewHolder(itemView) {}
                 }
 
                 override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-                    val item = flatList[position]
-                    when (holder.itemViewType) {
-                        TYPE_HEADER -> {
-                            val tv = holder.itemView as TextView
-                            tv.text = item as String
-                            applyFontSize(tv, getPrefs().fontSize, getPrefs().fontSize + 2)
+                    val template = templates[position]
+                    val text1 = holder.itemView.findViewById<TextView>(R.id.text1)
+                    val text2 = holder.itemView.findViewById<TextView>(R.id.text2)
+                    val btnEdit = holder.itemView.findViewById<Button>(R.id.btnEdit)
+
+                    text1.text = template.temp
+                    text2.text = ""
+
+                    btnEdit.setOnClickListener { showEditTemplateDialog(template) }
+                    applyFontSize(holder.itemView, getPrefs().fontSize)
+
+                    holder.itemView.setOnClickListener {
+                        val bundle = Bundle().apply {
+                            putInt("templateId", template.id)
+                            putString("templateName", template.temp)
                         }
-                        TYPE_ITEM -> {
-                            val template = item as Template
-                            val text1 = holder.itemView.findViewById<TextView>(R.id.text1)
-                            val text2 = holder.itemView.findViewById<TextView>(R.id.text2)
-                            val btnEdit = holder.itemView.findViewById<Button>(R.id.btnEdit)
-
-                            text1.text = template.temp
-                            text2.text = ""
-
-                            btnEdit.setOnClickListener { showEditTemplateDialog(template) }
-                            applyFontSize(holder.itemView, getPrefs().fontSize)
-
-                            holder.itemView.setOnClickListener {
-                                val bundle = Bundle().apply {
-                                    putInt("templateId", template.id)
-                                    putString("templateName", template.temp)
-                                }
-                                findNavController().navigate(R.id.action_directoryEditFragment_to_templateEditFragment, bundle)
-                            }
-                        }
+                        findNavController().navigate(R.id.action_directoryEditFragment_to_templateEditFragment, bundle)
                     }
                 }
 
-                override fun getItemCount() = flatList.size
+                override fun getItemCount() = templates.size
             }
             binding.recyclerView.adapter = adapter
         }
@@ -367,7 +333,7 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // ========== Паттерны (оставлены без кнопки "Ред.", только редактирование при нажатии) ==========
+    // ========== Паттерны ==========
     private suspend fun setupPatterns(dao: AppDao) {
         dao.getAllPatterns().collectLatest { patterns ->
             adapter = object : RecyclerView.Adapter<ViewHolder>() {
