@@ -32,9 +32,6 @@ class RemainsAdapter(
         private const val TYPE_ITEM = 1
     }
 
-    fun getRemainData(): Map<Int, Pair<InputType?, Int>> = remainData
-
-    /** Обновляет данные без пересоздания адаптера – сохраняет позицию прокрутки */
     fun updateData(newItems: List<Any>, newRemainData: Map<Int, Pair<InputType?, Int>>) {
         items = newItems
         remainData.clear()
