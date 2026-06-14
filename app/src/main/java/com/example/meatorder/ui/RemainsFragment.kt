@@ -21,7 +21,6 @@ class RemainsFragment : Fragment() {
     private var _binding: FragmentRemainsBinding? = null
     private val binding get() = _binding!!
 
-    // Поле для хранения плоского списка (заголовки + позиции)
     private var flatList = listOf<Any>()
 
     override fun onCreateView(
@@ -60,7 +59,14 @@ class RemainsFragment : Fragment() {
         }
         flatList = newFlatList
 
-        val adapter = RemainsAdapter(this@RemainsFragment, flatList, inputTypes) {}
+        val adapter = RemainsAdapter(
+            fragment = this@RemainsFragment,
+            items = flatList,
+            inputTypes = inputTypes,
+            onDataChanged = {},
+            highlight = true,
+            remainData = mutableMapOf()
+        )
 
         binding.recyclerRemains.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerRemains.addItemDecoration(
@@ -75,7 +81,6 @@ class RemainsFragment : Fragment() {
                 }
             }
         )
-        // Добавляем закрепляющиеся заголовки
         binding.recyclerRemains.addItemDecoration(
             StickyHeaderItemDecoration(
                 getItems = { flatList },
@@ -83,24 +88,45 @@ class RemainsFragment : Fragment() {
                 backgroundColor = 0xFFF0F0F0.toInt(),
                 textColor = 0xFF333333.toInt(),
                 getTextSize = { getPrefs().fontSize.toFloat() },
-                textSizeOffset = 40f
+                textSizeOffset = 20f
             )
         )
         binding.recyclerRemains.adapter = adapter
 
         binding.fabContinue.setOnClickListener {
-            val remainData = adapter.getRemainData()
-            val emptyEntities = entities.filter { entity ->
-                val data = remainData[entity.id]
-                data == null || data.second == 0
-            }.map { it.id }.toIntArray()
+            lifecycleScope.launch {
+                val remainData = adapter.getRemainData()
+                val minOrderItems = getDao().getAllMinOrderItems().first()
 
-            val bundle = Bundle().apply {
-                putBoolean("byBalance", true)
-                putIntArray("templateIds", intArrayOf())
-                putIntArray("preSelectedIds", emptyEntities)
+                // Рассчитываем заказ
+                val orderList = mutableListOf<Map<String, Any>>()
+                for ((entityId, pair) in remainData) {
+                    val (remainType, remainQty) = pair
+                    if (remainType == null || remainQty == 0) continue
+                    val minItem = minOrderItems.find { it.entity_id == entityId && it.input_type == remainType.type_name }
+                    if (minItem != null) {
+                        val diff = minItem.quantity - remainQty
+                        if (diff > 0) {
+                            orderList.add(mapOf(
+                                "entity_id" to entityId,
+                                "entity" to (entities.find { it.id == entityId }?.entity ?: ""),
+                                "group" to (entities.find { it.id == entityId }?.group ?: ""),
+                                "input_type" to remainType.type_name,
+                                "quantity" to diff
+                            ))
+                        }
+                    }
+                }
+
+                // Если ничего не добавилось, передаём пустой список
+                val selectedJson = com.google.gson.Gson().toJson(orderList)
+                val bundle = Bundle().apply {
+                    putBoolean("byBalance", true)
+                    putIntArray("templateIds", intArrayOf())
+                    putString("initialItemsJson", selectedJson)
+                }
+                findNavController().navigate(R.id.action_remainsFragment_to_order2Fragment, bundle)
             }
-            findNavController().navigate(R.id.action_remainsFragment_to_order2Fragment, bundle)
         }
     }
 
