@@ -40,6 +40,7 @@ class Order4Fragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        header?.title = "Итоговый заказ"
         applyFontSize(binding.root, getPrefs().fontSize)
 
         val json = arguments?.getString("finalItemsJson") ?: return
