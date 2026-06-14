@@ -78,22 +78,31 @@ object DictionaryImporter {
 
         for (line in lines) {
             val parts = line.split(";")
-            // Поддержка двух форматов: старый (4 колонки) и новый (5 колонок)
-            val (tempName, entityName, group, inputType, qty) = when (parts.size) {
+            if (parts.size < 4) continue
+
+            val tempName = parts[0].trim()
+            val entityName: String
+            val group: String?
+            val inputType: String
+            val qty: Int
+
+            when (parts.size) {
                 4 -> {
                     // Старый формат: temp;entity;input_type;input_default
-                    val (t, e, i, q) = parts
-                    Pair(t.trim(), e.trim(), null, i.trim(), q.trim().toIntOrNull() ?: 0)
+                    entityName = parts[1].trim()
+                    group = null
+                    inputType = parts[2].trim()
+                    qty = parts[3].trim().toIntOrNull() ?: 0
                 }
                 else -> {
                     // Новый формат: temp;group;entity;input_type;input_default
-                    if (parts.size < 5) continue
-                    val (t, g, e, i, q) = parts
-                    Pair(t.trim(), e.trim(), g.trim(), i.trim(), q.trim().toIntOrNull() ?: 0)
+                    entityName = parts[2].trim()
+                    group = parts[1].trim()
+                    inputType = parts[3].trim()
+                    qty = parts[4].trim().toIntOrNull() ?: 0
                 }
             }
 
-            // Ищем сущность по имени, и если указана группа – то с учётом группы
             val matchingEntities = if (group != null) {
                 entities.filter { it.entity == entityName && it.group == group }
             } else {
