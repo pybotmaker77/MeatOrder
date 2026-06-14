@@ -192,14 +192,14 @@ class DirectoryEditFragment : Fragment() {
             }
             binding.recyclerView.adapter = adapter
 
-            // Закрепляющиеся заголовки – передаём flatList напрямую
+            // Передаём лямбду, которая возвращает актуальный размер шрифта
             binding.recyclerView.addItemDecoration(
                 StickyHeaderItemDecoration(
                     items = flatList,
                     headerHeight = 120,
                     backgroundColor = 0xFFF0F0F0.toInt(),
                     textColor = 0xFF333333.toInt(),
-                    textSize = getPrefs().fontSize.toFloat()
+                    getTextSize = { getPrefs().fontSize.toFloat() }
                 )
             )
         }
