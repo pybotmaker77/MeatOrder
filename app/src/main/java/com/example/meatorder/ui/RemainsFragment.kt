@@ -37,6 +37,7 @@ class RemainsFragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        header?.title = "Остатки"
         applyFontSize(binding.root, getPrefs().fontSize)
 
         val dao = getDao()
@@ -98,7 +99,6 @@ class RemainsFragment : Fragment() {
                 val remainData = adapter.remainData
                 val minOrderItems = getDao().getAllMinOrderItems().first()
 
-                // Рассчитываем заказ на основе минимальных норм и введённых остатков
                 val orderList = mutableListOf<Map<String, Any>>()
                 for (minItem in minOrderItems) {
                     val entity = entities.find { it.id == minItem.entity_id } ?: continue
