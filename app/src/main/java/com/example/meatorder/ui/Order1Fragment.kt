@@ -38,6 +38,7 @@ class Order1Fragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        applyFontSize(binding.root, getPrefs().fontSize)
 
         binding.btnBalance.setOnClickListener {
             findNavController().navigate(R.id.action_order1Fragment_to_remainsFragment)
@@ -90,24 +91,21 @@ class Order1Fragment : Fragment() {
                 findNavController().navigate(R.id.action_order1Fragment_to_order2Fragment, bundle)
             }
             .setNegativeButton("Отмена", null)
-            .create()   // создаём диалог, но пока не показываем
+            .create()
 
-        // Устанавливаем слушатель, чтобы применить шрифт после отображения
         dialog.setOnShowListener { dialogInterface ->
             (dialogInterface as? AlertDialog)?.let {
                 it.window?.decorView?.let { rootView ->
                     applyFontSize(rootView, getPrefs().fontSize)
-                    // Повторно применяем к кнопкам, т.к. они могут не попасть под обход
-                    it.getButton(AlertDialog.BUTTON_POSITIVE)?.let { btn ->
-                        applyFontSize(btn, getPrefs().fontSize)
-                    }
-                    it.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { btn ->
-                        applyFontSize(btn, getPrefs().fontSize)
-                    }
+                }
+                it.getButton(AlertDialog.BUTTON_POSITIVE)?.let { btn ->
+                    applyFontSize(btn, getPrefs().fontSize)
+                }
+                it.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { btn ->
+                    applyFontSize(btn, getPrefs().fontSize)
                 }
             }
         }
-
         dialog.show()
     }
 
