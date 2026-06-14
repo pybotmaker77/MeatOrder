@@ -83,4 +83,13 @@ interface AppDao {
 
     @Delete
     suspend fun deleteInputType(inputType: InputType)
+
+    @Query("DELETE FROM entities")
+    suspend fun deleteAllEntities()
+    
+    @Query("DELETE FROM input_types")
+    suspend fun deleteAllInputTypes()
+    
+    @Query("DELETE FROM templates")
+    suspend fun deleteAllTemplates()
 }
