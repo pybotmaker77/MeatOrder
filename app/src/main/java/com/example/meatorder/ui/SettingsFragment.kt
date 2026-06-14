@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentSettingsBinding
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getPrefs
 
 class SettingsFragment : Fragment() {
@@ -28,6 +29,8 @@ class SettingsFragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+
+        applyFontSize(binding.root, getPrefs().fontSize)
 
         binding.btnFont.setOnClickListener {
             findNavController().navigate(R.id.action_settingsFragment_to_fontSettingsFragment)
