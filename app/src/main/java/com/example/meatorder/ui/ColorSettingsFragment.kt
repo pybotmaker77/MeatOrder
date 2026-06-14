@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentColorSettingsBinding
+import com.example.meatorder.utils.PreferencesHelper
 import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getPrefs
 
