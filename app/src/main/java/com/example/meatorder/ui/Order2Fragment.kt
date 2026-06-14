@@ -19,6 +19,7 @@ import com.example.meatorder.data.entity.TemplateItem
 import com.example.meatorder.databinding.FragmentOrder2Binding
 import com.example.meatorder.utils.*
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
@@ -52,7 +53,7 @@ class Order2Fragment : Fragment() {
         val args = arguments
         val byBalance = args?.getBoolean("byBalance", false) ?: false
         val templateIds = args?.getIntArray("templateIds")?.toList() ?: emptyList()
-        val preSelectedIds = args?.getIntArray("preSelectedIds")?.toList() ?: emptyList()
+        val initialItemsJson = args?.getString("initialItemsJson")
 
         lifecycleScope.launch {
             inputTypes = dao.getAllInputTypes().first()
@@ -62,20 +63,36 @@ class Order2Fragment : Fragment() {
                 val items = dao.getTemplateItems(tId).first()
                 templateItems.addAll(items)
             }
+
+            // Предзаполнение из initialItemsJson (для остатков)
+            val initialMap = mutableMapOf<Int, Pair<String, Int>>() // entityId -> (input_type, quantity)
+            if (!initialItemsJson.isNullOrEmpty()) {
+                val type = object : TypeToken<List<Map<String, Any>>>() {}.type
+                val list: List<Map<String, Any>> = Gson().fromJson(initialItemsJson, type)
+                for (item in list) {
+                    val entityId = (item["entity_id"] as Double).toInt()
+                    val inputType = item["input_type"] as String
+                    val quantity = (item["quantity"] as Double).toInt()
+                    initialMap[entityId] = Pair(inputType, quantity)
+                }
+            }
+
             val grouped = entities.groupBy { it.group }
             val list = mutableListOf<Order2Item>()
             for ((group, ents) in grouped) {
                 list.add(Order2Item(entity = null, group = group))
                 for (ent in ents) {
                     val templateItem = templateItems.find { it.entity_id == ent.id }
-                    val selected = if (byBalance && ent.id in preSelectedIds) true
-                    else templateItem != null
+                    val initial = initialMap[ent.id]
+                    val selected = if (initial != null) true
+                        else if (byBalance) false
+                        else templateItem != null
                     val item = Order2Item(
                         entity = ent,
                         group = group,
                         selected = selected,
-                        inputType = if (templateItem != null) inputTypes.find { it.type_name == templateItem.input_type } else null,
-                        quantity = templateItem?.input_default ?: 0
+                        inputType = if (initial != null) inputTypes.find { it.type_name == initial.first } else null,
+                        quantity = initial?.second ?: (templateItem?.input_default ?: 0)
                     )
                     list.add(item)
                 }
@@ -126,8 +143,6 @@ class Order2Fragment : Fragment() {
 
     private fun showSelectFormDialog(item: Order2Item, position: Int) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_select_form, null)
-        applyFontSize(dialogView, getPrefs().fontSize)
-
         val rgTypes = dialogView.findViewById<RadioGroup>(R.id.rgTypes)
         val etQuantity = dialogView.findViewById<EditText>(R.id.etQuantity)
 
@@ -158,32 +173,13 @@ class Order2Fragment : Fragment() {
                     adapter.notifyItemChanged(position)
                 }
             }
-            .setNeutralButton("Удалить") { _, _ ->
+            .setNegativeButton("Отмена") { _, _ ->
                 item.selected = false
                 item.inputType = null
                 item.quantity = 0
                 adapter.notifyItemChanged(position)
             }
-            .setNegativeButton("Отмена", null)
-            .create()
-
-        dialog.setOnShowListener { dialogInterface ->
-            (dialogInterface as? AlertDialog)?.let {
-                it.window?.decorView?.let { rootView ->
-                    applyFontSize(rootView, getPrefs().fontSize)
-                }
-                it.getButton(AlertDialog.BUTTON_POSITIVE)?.let { btn ->
-                    applyFontSize(btn, getPrefs().fontSize)
-                }
-                it.getButton(AlertDialog.BUTTON_NEUTRAL)?.let { btn ->
-                    applyFontSize(btn, getPrefs().fontSize)
-                }
-                it.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { btn ->
-                    applyFontSize(btn, getPrefs().fontSize)
-                }
-            }
-        }
-        dialog.show()
+            .show()
     }
 
     override fun onDestroyView() {
