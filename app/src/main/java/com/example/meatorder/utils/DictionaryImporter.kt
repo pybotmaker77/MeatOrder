@@ -77,7 +77,6 @@ object DictionaryImporter {
     private suspend fun importTemplates(csv: String, dao: AppDao) {
         val lines = csv.lines().drop(1).filter { it.isNotBlank() }
         val map = mutableMapOf<String, MutableList<TemplateItem>>()
-        // Загружаем все entities один раз
         val entities = dao.getAllEntities().first()
         for (line in lines) {
             val parts = line.split(";")
@@ -88,7 +87,7 @@ object DictionaryImporter {
             val qty = parts[3].trim().toIntOrNull() ?: 0
             val entityId = entities.find { it.entity == entityName }?.id ?: continue
             map.getOrPut(tempName) { mutableListOf() }
-                .add(TemplateItem(entity_id = entityId, input_type = inputType, input_default = qty))
+                .add(TemplateItem(entity_id = entityId, input_type = inputType, input_default = qty, template_id = 0))
         }
         dao.deleteAllTemplates()
         dao.deleteAllTemplateItems()
