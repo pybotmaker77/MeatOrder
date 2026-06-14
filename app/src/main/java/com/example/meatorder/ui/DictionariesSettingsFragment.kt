@@ -26,17 +26,23 @@ import java.util.zip.ZipOutputStream
 
 class DictionariesSettingsFragment : Fragment() {
 
+    // Локальные ссылки на DAO и настройки для использования в корутинах
+    private val dao by lazy { getDao() }
+    private val prefs by lazy { getPrefs() }
+
     private val folderPickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         uri?.let {
             requireContext().contentResolver.takePersistableUriPermission(
                 it,
                 Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
             )
-            this@DictionariesSettingsFragment.getPrefs().dictionariesFolderUri = it.toString()
+            prefs.dictionariesFolderUri = it.toString()
             Toast.makeText(requireContext(), "Папка выбрана. Все изменения будут сохраняться в CSV.", Toast.LENGTH_SHORT).show()
             lifecycleScope.launch {
-                DictionarySync.exportAllToFolder(requireContext(), it, this@DictionariesSettingsFragment.getDao())
-                Toast.makeText(requireContext(), "Справочники экспортированы в папку", Toast.LENGTH_SHORT).show()
+                DictionarySync.exportAllToFolder(requireContext(), it, dao)
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), "Справочники экспортированы в папку", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -79,7 +85,7 @@ class DictionariesSettingsFragment : Fragment() {
             try {
                 val zipFile = File(requireContext().cacheDir, "справочники.zip")
                 ZipOutputStream(FileOutputStream(zipFile)).use { zos ->
-                    val entities = this@DictionariesSettingsFragment.getDao().getAllEntities().first()
+                    val entities = dao.getAllEntities().first()
                     zos.putNextEntry(ZipEntry("entities.csv"))
                     zos.write("entity;group\n".toByteArray())
                     for (e in entities) {
@@ -87,7 +93,7 @@ class DictionariesSettingsFragment : Fragment() {
                     }
                     zos.closeEntry()
 
-                    val inputTypes = this@DictionariesSettingsFragment.getDao().getAllInputTypes().first()
+                    val inputTypes = dao.getAllInputTypes().first()
                     zos.putNextEntry(ZipEntry("input_types.csv"))
                     zos.write("type_name;short_name;weight_kg\n".toByteArray())
                     for (t in inputTypes) {
@@ -95,11 +101,11 @@ class DictionariesSettingsFragment : Fragment() {
                     }
                     zos.closeEntry()
 
-                    val templates = this@DictionariesSettingsFragment.getDao().getAllTemplates().first()
+                    val templates = dao.getAllTemplates().first()
                     zos.putNextEntry(ZipEntry("templates.csv"))
                     zos.write("temp;entity;input_type;input_default\n".toByteArray())
                     for (t in templates) {
-                        val items = this@DictionariesSettingsFragment.getDao().getTemplateItems(t.id).first()
+                        val items = dao.getTemplateItems(t.id).first()
                         for (item in items) {
                             val entity = entities.find { it.id == item.entity_id }?.entity ?: ""
                             zos.write("${t.temp};$entity;${item.input_type};${item.input_default}\n".toByteArray())
@@ -141,7 +147,7 @@ class DictionariesSettingsFragment : Fragment() {
                             "templates.csv" -> importTemplates(text)
                         }
 
-                        val folderUriStr = this@DictionariesSettingsFragment.getPrefs().dictionariesFolderUri
+                        val folderUriStr = prefs.dictionariesFolderUri
                         if (!folderUriStr.isNullOrEmpty()) {
                             val folderUri = Uri.parse(folderUriStr)
                             val docFolder = DocumentFile.fromTreeUri(requireContext(), folderUri)
@@ -171,8 +177,8 @@ class DictionariesSettingsFragment : Fragment() {
     private suspend fun importEntities(csv: String) {
         val pairs = parseEntitiesCsv(csv)
         val entities = pairs.map { MeatEntity(entity = it.first, group = it.second) }
-        getDao().deleteAllEntities()
-        getDao().insertEntities(entities)
+        dao.deleteAllEntities()
+        dao.insertEntities(entities)
     }
 
     private suspend fun importInputTypes(csv: String) {
@@ -185,8 +191,8 @@ class DictionariesSettingsFragment : Fragment() {
                 weight_kg = parts.getOrNull(2)?.toDoubleOrNull() ?: 1.0
             )
         }
-        getDao().deleteAllInputTypes()
-        types.forEach { getDao().insertInputType(it) }
+        dao.deleteAllInputTypes()
+        types.forEach { dao.insertInputType(it) }
     }
 
     private suspend fun importTemplates(csv: String) {
@@ -199,16 +205,16 @@ class DictionariesSettingsFragment : Fragment() {
             val entityName = parts[1].trim()
             val inputType = parts[2].trim()
             val qty = parts[3].trim().toIntOrNull() ?: 0
-            val entityId = getDao().getAllEntities().first().find { it.entity == entityName }?.id ?: continue
+            val entityId = dao.getAllEntities().first().find { it.entity == entityName }?.id ?: continue
             map.getOrPut(tempName) { mutableListOf() }
                 .add(TemplateItem(entity_id = entityId, input_type = inputType, input_default = qty))
         }
-        getDao().deleteAllTemplates()
-        getDao().deleteAllTemplateItems()
+        dao.deleteAllTemplates()
+        dao.deleteAllTemplateItems()
         for ((name, items) in map) {
-            val id = getDao().insertTemplate(Template(temp = name))
+            val id = dao.insertTemplate(Template(temp = name))
             for (item in items) {
-                getDao().insertTemplateItem(item.copy(template_id = id.toInt()))
+                dao.insertTemplateItem(item.copy(template_id = id.toInt()))
             }
         }
     }
