@@ -47,6 +47,7 @@ class Order2Fragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        header?.title = "Заказ"
         applyFontSize(binding.root, getPrefs().fontSize)
 
         val dao = getDao()
@@ -83,10 +84,7 @@ class Order2Fragment : Fragment() {
             }
 
             // Сортировка: группа -> наименование
-            val sortedEntities = entities.sortedWith(Comparator { a, b ->
-                val groupComp = a.group.compareTo(b.group)
-                if (groupComp != 0) groupComp else a.entity.compareTo(b.entity)
-            })
+            val sortedEntities = entities.sortedWith(compareBy<MeatEntity> { it.group }.thenBy { it.entity })
             val grouped = sortedEntities.groupBy { it.group }
             val list = mutableListOf<Order2Item>()
             for ((group, ents) in grouped) {
