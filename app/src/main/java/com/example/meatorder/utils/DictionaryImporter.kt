@@ -8,11 +8,8 @@ import com.example.meatorder.data.entity.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-import java.util.zip.ZipOutputStream
 
 object DictionaryImporter {
 
@@ -77,25 +74,37 @@ object DictionaryImporter {
     private suspend fun importTemplates(csv: String, dao: AppDao) {
         val lines = csv.lines().drop(1).filter { it.isNotBlank() }
         val map = mutableMapOf<String, MutableList<TemplateItem>>()
-        // Загружаем все entities один раз, чтобы потом искать по имени
         val entities = dao.getAllEntities().first()
+
         for (line in lines) {
             val parts = line.split(";")
-            if (parts.size < 4) continue
-            val tempName = parts[0].trim()
-            val entityName = parts[1].trim()
-            val inputType = parts[2].trim()
-            val qty = parts[3].trim().toIntOrNull() ?: 0
-            // Ищем entity по точному совпадению имени (если несколько – берём первое попавшееся, но лучше предупредить)
-            val matchingEntities = entities.filter { it.entity == entityName }
-            if (matchingEntities.size > 1) {
-                // Если есть дубликаты, берём первую (можно доработать поиск по группе, если в CSV добавится колонка группы)
-                // Пока просто предупреждение в лог, но в продакшене лучше добавить группу в CSV
+            // Поддержка двух форматов: старый (4 колонки) и новый (5 колонок)
+            val (tempName, entityName, group, inputType, qty) = when (parts.size) {
+                4 -> {
+                    // Старый формат: temp;entity;input_type;input_default
+                    val (t, e, i, q) = parts
+                    Pair(t.trim(), e.trim(), null, i.trim(), q.trim().toIntOrNull() ?: 0)
+                }
+                else -> {
+                    // Новый формат: temp;group;entity;input_type;input_default
+                    if (parts.size < 5) continue
+                    val (t, g, e, i, q) = parts
+                    Pair(t.trim(), e.trim(), g.trim(), i.trim(), q.trim().toIntOrNull() ?: 0)
+                }
+            }
+
+            // Ищем сущность по имени, и если указана группа – то с учётом группы
+            val matchingEntities = if (group != null) {
+                entities.filter { it.entity == entityName && it.group == group }
+            } else {
+                entities.filter { it.entity == entityName }
             }
             val entity = matchingEntities.firstOrNull() ?: continue
+
             map.getOrPut(tempName) { mutableListOf() }
                 .add(TemplateItem(entity_id = entity.id, input_type = inputType, input_default = qty, template_id = 0))
         }
+
         dao.deleteAllTemplates()
         dao.deleteAllTemplateItems()
         for ((name, items) in map) {
