@@ -160,7 +160,5 @@
     <fragment
         android:id="@+id/dictionariesSettingsFragment"
         android:name="com.example.meatorder.ui.DictionariesSettingsFragment"
-        android:label="Настройки справочников"
-        tools:layout="@layout/fragment_dictionaries_settings" />
-
+        android:label="Настройки справочников" />
 </navigation>
