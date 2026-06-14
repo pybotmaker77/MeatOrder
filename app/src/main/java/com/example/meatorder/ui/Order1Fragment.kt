@@ -42,10 +42,12 @@ class Order1Fragment : Fragment() {
         applyFontSize(binding.root, getPrefs().fontSize)
 
         binding.btnBalance.setOnClickListener {
+            getPrefs().clearDraft()
             findNavController().navigate(R.id.action_order1Fragment_to_remainsFragment)
         }
 
         binding.btnFromScratch.setOnClickListener {
+            getPrefs().clearDraft()
             val bundle = Bundle().apply {
                 putBoolean("byBalance", false)
                 putIntArray("templateIds", intArrayOf())
@@ -54,6 +56,7 @@ class Order1Fragment : Fragment() {
         }
 
         binding.btnFromTemplate.setOnClickListener {
+            getPrefs().clearDraft()
             CoroutineScope(Dispatchers.IO).launch {
                 val templates = getDao().getAllTemplates().first()
                 withContext(Dispatchers.Main) {
