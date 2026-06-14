@@ -48,6 +48,9 @@ interface AppDao {
     @Query("SELECT * FROM template_items WHERE template_id = :templateId")
     fun getTemplateItems(templateId: Int): Flow<List<TemplateItem>>
 
+    @Query("DELETE FROM template_items WHERE template_id = :templateId")
+    suspend fun deleteTemplateItemsByTemplateId(templateId: Int)
+
     @Insert
     suspend fun insertTemplateItem(item: TemplateItem)
 
