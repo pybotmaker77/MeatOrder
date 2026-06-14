@@ -98,22 +98,62 @@ class RemainsFragment : Fragment() {
             lifecycleScope.launch {
                 val remainData = adapter.remainData
                 val minOrderItems = getDao().getAllMinOrderItems().first()
+                val allInputTypes = getDao().getAllInputTypes().first()  // свежий список
 
                 val orderList = mutableListOf<Map<String, Any>>()
                 for (minItem in minOrderItems) {
                     val entity = entities.find { it.id == minItem.entity_id } ?: continue
+
+                    // Тип единиц минимального заказа
+                    val minType = allInputTypes.find { it.type_name == minItem.input_type } ?: continue
+                    val minWeight = minType.weight_kg  // вес одной единицы минимального типа
+
+                    // Находим остаток по этому entity_id
                     val remainPair = remainData[minItem.entity_id]
-                    val remainQty = if (remainPair != null && remainPair.first?.type_name == minItem.input_type) {
-                        remainPair.second
-                    } else 0
-                    val diff = minItem.quantity - remainQty
-                    if (diff > 0) {
+                    if (remainPair != null && remainPair.second > 0 && remainPair.first != null) {
+                        val remainType = remainPair.first!!
+                        val remainQty = remainPair.second
+
+                        // Если типы совпадают – считаем как раньше
+                        if (remainType.type_name == minItem.input_type) {
+                            val diff = minItem.quantity - remainQty
+                            if (diff > 0) {
+                                orderList.add(mapOf(
+                                    "entity_id" to minItem.entity_id,
+                                    "entity" to entity.entity,
+                                    "group" to entity.group,
+                                    "input_type" to minItem.input_type,
+                                    "quantity" to diff
+                                ))
+                            }
+                        } else {
+                            // Конвертация через вес
+                            val remainWeightKg = remainQty * remainType.weight_kg
+                            val minWeightKg = minItem.quantity * minWeight
+
+                            if (minWeightKg > remainWeightKg) {
+                                val diffKg = minWeightKg - remainWeightKg
+                                // Переводим разницу обратно в единицы минимального типа
+                                val diff = kotlin.math.ceil(diffKg / minWeight).toInt()
+                                if (diff > 0) {
+                                    orderList.add(mapOf(
+                                        "entity_id" to minItem.entity_id,
+                                        "entity" to entity.entity,
+                                        "group" to entity.group,
+                                        "input_type" to minItem.input_type,
+                                        "quantity" to diff
+                                    ))
+                                }
+                            }
+                        }
+                    } else {
+                        // Остаток не указан – включаем весь минимальный заказ
                         orderList.add(mapOf(
                             "entity_id" to minItem.entity_id,
                             "entity" to entity.entity,
                             "group" to entity.group,
                             "input_type" to minItem.input_type,
-                            "quantity" to diff
+                            "quantity" to minItem.quantity
                         ))
                     }
                 }
