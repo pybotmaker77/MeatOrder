@@ -30,15 +30,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <Button
-        android:id="@+id/btnExport"
+        android:id="@+id/btnDictionariesSettings"
         style="@style/MeatButton"
-        android:text="Экспорт настроек"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    <Button
-        android:id="@+id/btnImport"
-        style="@style/MeatButton"
-        android:text="Импорт настроек"
+        android:text="НАСТРОЙКИ СПРАВОЧНИКОВ"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>
