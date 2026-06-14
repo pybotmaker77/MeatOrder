@@ -28,8 +28,7 @@ class RemainsAdapter(
         private const val TYPE_ITEM = 1
     }
 
-    // Храним для каждой позиции выбранный тип и количество
-    private val remainData = mutableMapOf<Int, Pair<InputType?, Int>>() // entityId -> (тип, количество)
+    private val remainData = mutableMapOf<Int, Pair<InputType?, Int>>()
 
     fun getRemainData(): Map<Int, Pair<InputType?, Int>> = remainData
 
@@ -41,11 +40,16 @@ class RemainsAdapter(
         return when (viewType) {
             TYPE_HEADER -> {
                 val view = TextView(parent.context).apply {
+                    layoutParams = RecyclerView.LayoutParams(
+                        RecyclerView.LayoutParams.MATCH_PARENT,
+                        RecyclerView.LayoutParams.WRAP_CONTENT
+                    )
                     setPadding(32, 16, 16, 8)
                     setBackgroundColor(0xFFF0F0F0.toInt())
                     setTextColor(0xFF333333.toInt())
+                    // размер применится в bind
                 }
-                object : RecyclerView.ViewHolder(view) {}
+                HeaderViewHolder(view)
             }
             else -> {
                 val binding = ItemRemainsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -65,7 +69,6 @@ class RemainsAdapter(
 
     override fun getItemCount() = items.size
 
-    // Для повторного использования старого ViewHolder
     inner class EntityViewHolder(private val binding: ItemRemainsBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(entity: MeatEntity) {
