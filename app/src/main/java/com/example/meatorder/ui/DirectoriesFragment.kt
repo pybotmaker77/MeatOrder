@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.databinding.FragmentDirectoriesBinding
-import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getPrefs
 
 class DirectoriesFragment : Fragment() {
@@ -29,9 +28,9 @@ class DirectoriesFragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
-        applyFontSize(binding.root, getPrefs().fontSize)
 
         binding.btnEntities.setOnClickListener { navigateToEditor("entities") }
+        binding.btnMinOrder.setOnClickListener { navigateToEditor("min_order") }
         binding.btnTemplates.setOnClickListener { navigateToEditor("templates") }
         binding.btnPatterns.setOnClickListener { navigateToEditor("patterns") }
         binding.btnInputTypes.setOnClickListener { navigateToEditor("input_types") }
