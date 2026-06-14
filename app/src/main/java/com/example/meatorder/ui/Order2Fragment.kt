@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.meatorder.R
 import com.example.meatorder.data.entity.InputType
+import com.example.meatorder.data.entity.MeatEntity
 import com.example.meatorder.data.entity.TemplateItem
 import com.example.meatorder.databinding.FragmentOrder2Binding
 import com.example.meatorder.utils.*
@@ -84,7 +85,10 @@ class Order2Fragment : Fragment() {
             }
 
             // Сортировка: группа -> наименование
-            val sortedEntities = entities.sortedWith(compareBy<MeatEntity> { it.group }.thenBy { it.entity })
+            val sortedEntities = entities.sortedWith(Comparator { a, b ->
+                val groupComp = a.group.compareTo(b.group)
+                if (groupComp != 0) groupComp else a.entity.compareTo(b.entity)
+            })
             val grouped = sortedEntities.groupBy { it.group }
             val list = mutableListOf<Order2Item>()
             for ((group, ents) in grouped) {
