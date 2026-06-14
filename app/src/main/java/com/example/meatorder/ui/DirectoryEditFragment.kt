@@ -35,6 +35,7 @@ class DirectoryEditFragment : Fragment() {
     private val TYPE_ITEM = 1
 
     private var flatList = mutableListOf<Any>()
+    private var minOrderAdapter: RemainsAdapter? = null   // ← новое поле
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -399,7 +400,7 @@ class DirectoryEditFragment : Fragment() {
         }
     }
 
-        // ========== Минимальный заказ ==========
+    // ========== Минимальный заказ ==========
     private suspend fun setupMinOrder(dao: AppDao) {
         val entities = dao.getAllEntities().first()
         val inputTypes = dao.getAllInputTypes().first()
@@ -547,8 +548,7 @@ class DirectoryEditFragment : Fragment() {
                 dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
             }
             "min_order" -> {
-                // Для минимального заказа используем тот же диалог, что и в остатках (через RemainsAdapter)
-                // Кнопка FAB здесь не вызывает этот метод, т.к. в min_order свой адаптер
+                // Для минимального заказа используется свой адаптер, FAB не вызывает этот диалог
             }
         }
     }
