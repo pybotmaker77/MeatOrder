@@ -28,6 +28,7 @@ class DirectoriesFragment : Fragment() {
         val header = binding.root.findViewById<androidx.appcompat.widget.Toolbar>(R.id.header)
         header?.setNavigationOnClickListener { findNavController().popBackStack() }
         header?.setBackgroundColor(getPrefs().headerColor)
+        header?.title = "Справочники"
 
         binding.btnEntities.setOnClickListener { navigateToEditor("entities") }
         binding.btnMinOrder.setOnClickListener { navigateToEditor("min_order") }
