@@ -399,7 +399,7 @@ class DirectoryEditFragment : Fragment() {
         }
     }
 
-    // ========== Минимальный заказ ==========
+        // ========== Минимальный заказ ==========
     private suspend fun setupMinOrder(dao: AppDao) {
         val entities = dao.getAllEntities().first()
         val inputTypes = dao.getAllInputTypes().first()
@@ -415,37 +415,41 @@ class DirectoryEditFragment : Fragment() {
             }
             flatList = newFlatList
 
-            val remainsAdapter = RemainsAdapter(
-                fragment = this@DirectoryEditFragment,
-                items = flatList,
-                inputTypes = inputTypes,
-                onDataChanged = { },
-                highlight = false,
-                remainData = mutableMapOf<Int, Pair<InputType?, Int>>().apply {
-                    for (item in minItems) {
-                        val type = inputTypes.find { it.type_name == item.input_type }
-                        put(item.entity_id, Pair(type, item.quantity))
-                    }
-                },
-                onSave = { entityId, type, qty ->
-                    lifecycleScope.launch {
-                        val existing = dao.getAllMinOrderItems().first().find { it.entity_id == entityId && it.input_type == type.type_name }
-                        if (existing != null) {
-                            dao.updateMinOrderItem(existing.copy(quantity = qty))
-                        } else {
-                            dao.insertMinOrderItem(MinOrderItem(entity_id = entityId, input_type = type.type_name, quantity = qty))
+            val newRemainData = mutableMapOf<Int, Pair<InputType?, Int>>()
+            for (item in minItems) {
+                val type = inputTypes.find { it.type_name == item.input_type }
+                newRemainData[item.entity_id] = Pair(type, item.quantity)
+            }
+
+            if (minOrderAdapter == null) {
+                minOrderAdapter = RemainsAdapter(
+                    fragment = this@DirectoryEditFragment,
+                    items = flatList,
+                    inputTypes = inputTypes,
+                    onDataChanged = { },
+                    highlight = false,
+                    remainData = newRemainData,
+                    onSave = { entityId, type, qty ->
+                        lifecycleScope.launch {
+                            val existing = dao.getAllMinOrderItems().first().find { it.entity_id == entityId && it.input_type == type.type_name }
+                            if (existing != null) {
+                                dao.updateMinOrderItem(existing.copy(quantity = qty))
+                            } else {
+                                dao.insertMinOrderItem(MinOrderItem(entity_id = entityId, input_type = type.type_name, quantity = qty))
+                            }
+                        }
+                    },
+                    onDelete = { entityId ->
+                        lifecycleScope.launch {
+                            val items = dao.getAllMinOrderItems().first().filter { it.entity_id == entityId }
+                            items.forEach { dao.deleteMinOrderItem(it) }
                         }
                     }
-                },
-                onDelete = { entityId ->
-                    lifecycleScope.launch {
-                        val items = dao.getAllMinOrderItems().first().filter { it.entity_id == entityId }
-                        items.forEach { dao.deleteMinOrderItem(it) }
-                    }
-                }
-            )
-
-            binding.recyclerView.adapter = remainsAdapter
+                )
+                binding.recyclerView.adapter = minOrderAdapter
+            } else {
+                minOrderAdapter?.updateData(flatList, newRemainData)
+            }
         }
     }
 
