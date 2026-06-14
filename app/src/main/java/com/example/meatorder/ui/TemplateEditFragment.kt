@@ -17,6 +17,7 @@ import com.example.meatorder.databinding.FragmentTemplateEditBinding
 import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
+import com.example.meatorder.utils.syncDictionaries
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -58,9 +59,7 @@ class TemplateEditFragment : Fragment() {
         lifecycleScope.launch {
             entities = dao.getAllEntities().first()
             inputTypes = dao.getAllInputTypes().first()
-            dao.getTemplateItems(templateId).collectLatest { items ->
-                updateList(items)
-            }
+            dao.getTemplateItems(templateId).collectLatest { items -> updateList(items) }
         }
 
         binding.fabAddItem.setOnClickListener { showAddItemDialog() }
@@ -118,50 +117,26 @@ class TemplateEditFragment : Fragment() {
                         text1.text = entity?.entity ?: "???"
                         text2.text = "${templateItem.input_default} ${templateItem.input_type}"
 
-                        btnEdit.setOnClickListener {
-                            showEditItemDialog(templateItem)
-                        }
+                        btnEdit.setOnClickListener { showEditItemDialog(templateItem) }
                         holder.itemView.setOnLongClickListener {
                             AlertDialog.Builder(requireContext())
                                 .setTitle("Удалить элемент")
                                 .setMessage("Удалить \"${entity?.entity}\" из шаблона?")
                                 .setPositiveButton("Да") { _, _ ->
-                                    lifecycleScope.launch { getDao().deleteTemplateItem(templateItem) }
+                                    lifecycleScope.launch {
+                                        getDao().deleteTemplateItem(templateItem)
+                                        syncDictionaries()
+                                    }
                                 }
                                 .setNegativeButton("Нет", null)
                                 .show()
                             true
                         }
-
                         applyFontSize(holder.itemView, getPrefs().fontSize)
                     }
                 }
             }
-
             override fun getItemCount() = flatList.size
-        }
-    }
-
-    private fun makeSpinnerAdapter(items: List<String>): ArrayAdapter<String> {
-        return object : ArrayAdapter<String>(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            items
-        ) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getView(position, convertView, parent) as TextView
-                view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                view.setPadding(10, 10, 10, 10)
-                return view
-            }
-            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val inflater = LayoutInflater.from(context)
-                val dropView = inflater.inflate(R.layout.item_spinner_dropdown, parent, false)
-                val text = dropView.findViewById<TextView>(R.id.text1)
-                text.text = getItem(position)
-                text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
-                return dropView
-            }
         }
     }
 
@@ -175,15 +150,12 @@ class TemplateEditFragment : Fragment() {
 
         val layout = LinearLayout(requireContext()).apply { orientation = LinearLayout.VERTICAL }
 
-        // Группа
         val spinnerGroup = Spinner(requireContext()).apply {
             adapter = makeSpinnerAdapter(groups)
         }
 
-        // Список элементов (изначально пустой, обновится при выборе группы)
         val spinnerEntity = Spinner(requireContext())
 
-        // Обновление списка элементов при смене группы
         spinnerGroup.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedGroup = groups[position]
@@ -193,7 +165,6 @@ class TemplateEditFragment : Fragment() {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        // Единицы измерения
         val spinnerType = Spinner(requireContext()).apply {
             adapter = makeSpinnerAdapter(inputTypes.map { it.type_name })
         }
@@ -231,6 +202,7 @@ class TemplateEditFragment : Fragment() {
                                 input_default = qty
                             )
                         )
+                        syncDictionaries()
                     }
                 }
             }
@@ -305,6 +277,7 @@ class TemplateEditFragment : Fragment() {
                                 input_default = qty
                             )
                         )
+                        syncDictionaries()
                     }
                 }
             }
@@ -313,6 +286,29 @@ class TemplateEditFragment : Fragment() {
 
         dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
+    }
+
+    private fun makeSpinnerAdapter(items: List<String>): ArrayAdapter<String> {
+        return object : ArrayAdapter<String>(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            items
+        ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent) as TextView
+                view.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                view.setPadding(10, 10, 10, 10)
+                return view
+            }
+            override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val inflater = LayoutInflater.from(context)
+                val dropView = inflater.inflate(R.layout.item_spinner_dropdown, parent, false)
+                val text = dropView.findViewById<TextView>(R.id.text1)
+                text.text = getItem(position)
+                text.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, getPrefs().fontSize.toFloat())
+                return dropView
+            }
+        }
     }
 
     override fun onDestroyView() {
