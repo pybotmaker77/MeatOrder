@@ -121,7 +121,7 @@ class DirectoryEditFragment : Fragment() {
         }
     }
 
-    // ========== Номенклатура ==========
+    // ========== Номенклатура с группировкой и кнопкой "Ред." ==========
     private suspend fun setupEntities(dao: AppDao) {
         dao.getAllEntities().collectLatest { entities ->
             val grouped = entities.groupBy { it.group }
@@ -179,7 +179,9 @@ class DirectoryEditFragment : Fragment() {
                                 AlertDialog.Builder(requireContext())
                                     .setTitle("Удалить")
                                     .setMessage("Удалить \"${entity.entity}\"?")
-                                    .setPositiveButton("Да") { _, _ -> lifecycleScope.launch { dao.deleteEntity(entity) } }
+                                    .setPositiveButton("Да") { _, _ ->
+                                        lifecycleScope.launch { dao.deleteEntity(entity) }
+                                    }
                                     .setNegativeButton("Нет", null)
                                     .show()
                                 true
@@ -219,7 +221,7 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // ========== Шаблоны (без группировки) ==========
+    // ========== Шаблоны с группировкой и кнопкой "Ред." ==========
     private suspend fun setupTemplates(dao: AppDao) {
         dao.getAllTemplates().collectLatest { templates ->
             adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -247,6 +249,22 @@ class DirectoryEditFragment : Fragment() {
                             putString("templateName", template.temp)
                         }
                         findNavController().navigate(R.id.action_directoryEditFragment_to_templateEditFragment, bundle)
+                    }
+
+                    // Долгое нажатие – удаление шаблона с предварительным удалением его элементов
+                    holder.itemView.setOnLongClickListener {
+                        AlertDialog.Builder(requireContext())
+                            .setTitle("Удалить шаблон")
+                            .setMessage("Удалить \"${template.temp}\" и все его элементы?")
+                            .setPositiveButton("Да") { _, _ ->
+                                lifecycleScope.launch {
+                                    dao.deleteTemplateItemsByTemplateId(template.id)
+                                    dao.deleteTemplate(template)
+                                }
+                            }
+                            .setNegativeButton("Нет", null)
+                            .show()
+                        true
                     }
                 }
 
@@ -276,7 +294,7 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // ========== Единицы измерения ==========
+    // ========== Единицы измерения с кнопкой "Ред." ==========
     private suspend fun setupInputTypes(dao: AppDao) {
         dao.getAllInputTypes().collectLatest { inputTypes ->
             adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
