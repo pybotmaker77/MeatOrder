@@ -40,12 +40,14 @@ object DictionarySync {
 
             val templates = dao.getAllTemplates().first()
             writeCsvToFile(context, docFolder, "templates.csv") { outputStream ->
-                outputStream.write("temp;entity;input_type;input_default\n".toByteArray())
+                outputStream.write("temp;group;entity;input_type;input_default\n".toByteArray())
                 for (t in templates) {
                     val items = dao.getTemplateItems(t.id).first()
                     for (item in items) {
-                        val entity = entities.find { it.id == item.entity_id }?.entity ?: ""
-                        outputStream.write("${t.temp};$entity;${item.input_type};${item.input_default}\n".toByteArray())
+                        val entity = entities.find { it.id == item.entity_id }
+                        if (entity != null) {
+                            outputStream.write("${t.temp};${entity.group};${entity.entity};${item.input_type};${item.input_default}\n".toByteArray())
+                        }
                     }
                 }
             }
@@ -80,12 +82,14 @@ object DictionarySync {
                     zos.closeEntry()
 
                     zos.putNextEntry(ZipEntry("templates.csv"))
-                    zos.write("temp;entity;input_type;input_default\n".toByteArray())
+                    zos.write("temp;group;entity;input_type;input_default\n".toByteArray())
                     for (t in templates) {
                         val items = templateItemsMap[t.id] ?: emptyList()
                         for (item in items) {
-                            val entityName = entities.find { it.id == item.entity_id }?.entity ?: ""
-                            zos.write("${t.temp};$entityName;${item.input_type};${item.input_default}\n".toByteArray())
+                            val entity = entities.find { it.id == item.entity_id }
+                            if (entity != null) {
+                                zos.write("${t.temp};${entity.group};${entity.entity};${item.input_type};${item.input_default}\n".toByteArray())
+                            }
                         }
                     }
                     zos.closeEntry()
@@ -101,14 +105,11 @@ object DictionarySync {
                     putExtra(Intent.EXTRA_STREAM, uri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 }
-                // Запускаем chooser из главного потока
                 withContext(Dispatchers.Main) {
                     context.startActivity(Intent.createChooser(shareIntent, "Отправить справочники"))
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    // Показываем ошибку, но не крашим
-                }
+                // Ошибка логируется, но не крашит приложение
             }
         }
     }
