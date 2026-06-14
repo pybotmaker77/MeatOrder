@@ -14,6 +14,7 @@ import androidx.core.content.FileProvider
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.example.meatorder.data.dao.AppDao
 import com.example.meatorder.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,9 +27,8 @@ import java.util.zip.ZipOutputStream
 
 class DictionariesSettingsFragment : Fragment() {
 
-    // Локальные ссылки на DAO и настройки для использования в корутинах
-    private val dao by lazy { getDao() }
-    private val prefs by lazy { getPrefs() }
+    private lateinit var dao: AppDao
+    private lateinit var prefs: PreferencesHelper
 
     private val folderPickerLauncher = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
         uri?.let {
@@ -55,6 +55,10 @@ class DictionariesSettingsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // Инициализируем dao и prefs, когда фрагмент уже присоединён
+        dao = getDao()
+        prefs = getPrefs()
+
         val layout = LinearLayout(requireContext()).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(16, 16, 16, 16)
