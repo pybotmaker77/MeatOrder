@@ -149,7 +149,7 @@ class DirectoryEditFragment : Fragment() {
                         }
                         else -> {
                             val itemView = LayoutInflater.from(parent.context)
-                                .inflate(android.R.layout.simple_list_item_2, parent, false)
+                                .inflate(R.layout.item_edit_button, parent, false)
                             object : RecyclerView.ViewHolder(itemView) {}
                         }
                     }
@@ -165,20 +165,14 @@ class DirectoryEditFragment : Fragment() {
                         }
                         TYPE_ITEM -> {
                             val entity = item as MeatEntity
-                            val text1 = holder.itemView.findViewById<TextView>(android.R.id.text1)
-                            val text2 = holder.itemView.findViewById<TextView>(android.R.id.text2)
-                            text1?.text = entity.entity
-                            text2?.text = ""   // убираем "Группа: ..."
+                            val text1 = holder.itemView.findViewById<TextView>(R.id.text1)
+                            val text2 = holder.itemView.findViewById<TextView>(R.id.text2)
+                            val btnEdit = holder.itemView.findViewById<Button>(R.id.btnEdit)
 
-                            val oldButton = holder.itemView.findViewWithTag<Button>("edit_button")
-                            oldButton?.let { (holder.itemView as ViewGroup).removeView(it) }
+                            text1.text = entity.entity
+                            text2.text = ""   // убираем "Группа: ..."
 
-                            val button = Button(holder.itemView.context).apply {
-                                tag = "edit_button"
-                                text = "Ред."
-                                setOnClickListener { showEditEntityDialog(entity) }
-                            }
-                            (holder.itemView as? LinearLayout)?.addView(button)
+                            btnEdit.setOnClickListener { showEditEntityDialog(entity) }
                             applyFontSize(holder.itemView, getPrefs().fontSize)
 
                             holder.itemView.setOnLongClickListener {
@@ -225,7 +219,7 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // ========== Шаблоны с группировкой ==========
+    // ========== Шаблоны (с группировкой по первой букве) ==========
     private suspend fun setupTemplates(dao: AppDao) {
         dao.getAllTemplates().collectLatest { templates ->
             val grouped = templates.groupBy { it.temp.firstOrNull()?.uppercase() ?: "#" }
@@ -253,7 +247,7 @@ class DirectoryEditFragment : Fragment() {
                         }
                         else -> {
                             val itemView = LayoutInflater.from(parent.context)
-                                .inflate(android.R.layout.simple_list_item_1, parent, false)
+                                .inflate(R.layout.item_edit_button, parent, false)
                             object : RecyclerView.ViewHolder(itemView) {}
                         }
                     }
@@ -269,18 +263,14 @@ class DirectoryEditFragment : Fragment() {
                         }
                         TYPE_ITEM -> {
                             val template = item as Template
-                            val text1 = holder.itemView.findViewById<TextView>(android.R.id.text1)
-                            text1?.text = template.temp
+                            val text1 = holder.itemView.findViewById<TextView>(R.id.text1)
+                            val text2 = holder.itemView.findViewById<TextView>(R.id.text2)
+                            val btnEdit = holder.itemView.findViewById<Button>(R.id.btnEdit)
 
-                            val oldButton = holder.itemView.findViewWithTag<Button>("edit_button")
-                            oldButton?.let { (holder.itemView as ViewGroup).removeView(it) }
+                            text1.text = template.temp
+                            text2.text = ""
 
-                            val button = Button(holder.itemView.context).apply {
-                                tag = "edit_button"
-                                text = "Ред."
-                                setOnClickListener { showEditTemplateDialog(template) }
-                            }
-                            (holder.itemView as? LinearLayout)?.addView(button)
+                            btnEdit.setOnClickListener { showEditTemplateDialog(template) }
                             applyFontSize(holder.itemView, getPrefs().fontSize)
 
                             holder.itemView.setOnClickListener {
@@ -320,32 +310,26 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // ========== Единицы измерения с кнопкой "Ред." ==========
+    // ========== Единицы измерения ==========
     private suspend fun setupInputTypes(dao: AppDao) {
         dao.getAllInputTypes().collectLatest { inputTypes ->
             adapter = object : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
                     val itemView = LayoutInflater.from(parent.context)
-                        .inflate(android.R.layout.simple_list_item_2, parent, false)
+                        .inflate(R.layout.item_edit_button, parent, false)
                     return object : RecyclerView.ViewHolder(itemView) {}
                 }
 
                 override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
                     val type = inputTypes[position]
-                    val text1 = holder.itemView.findViewById<TextView>(android.R.id.text1)
-                    val text2 = holder.itemView.findViewById<TextView>(android.R.id.text2)
-                    text1?.text = type.type_name
-                    text2?.text = "Сокр.: ${type.short_name}, Вес: ${type.weight_kg} кг"
+                    val text1 = holder.itemView.findViewById<TextView>(R.id.text1)
+                    val text2 = holder.itemView.findViewById<TextView>(R.id.text2)
+                    val btnEdit = holder.itemView.findViewById<Button>(R.id.btnEdit)
 
-                    val oldButton = holder.itemView.findViewWithTag<Button>("edit_button")
-                    oldButton?.let { (holder.itemView as ViewGroup).removeView(it) }
+                    text1.text = type.type_name
+                    text2.text = "Сокр.: ${type.short_name}, Вес: ${type.weight_kg} кг"
 
-                    val button = Button(holder.itemView.context).apply {
-                        tag = "edit_button"
-                        text = "Ред."
-                        setOnClickListener { showEditInputTypeDialog(type) }
-                    }
-                    (holder.itemView as? LinearLayout)?.addView(button)
+                    btnEdit.setOnClickListener { showEditInputTypeDialog(type) }
                     applyFontSize(holder.itemView, getPrefs().fontSize)
                 }
 
@@ -383,7 +367,7 @@ class DirectoryEditFragment : Fragment() {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { applyFontSize(it, getPrefs().fontSize) }
     }
 
-    // ========== Паттерны ==========
+    // ========== Паттерны (оставлены без кнопки "Ред.", только редактирование при нажатии) ==========
     private suspend fun setupPatterns(dao: AppDao) {
         dao.getAllPatterns().collectLatest { patterns ->
             adapter = object : RecyclerView.Adapter<ViewHolder>() {
