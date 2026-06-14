@@ -15,6 +15,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.example.meatorder.data.dao.AppDao
+import com.example.meatorder.data.entity.*
 import com.example.meatorder.utils.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -86,7 +87,6 @@ class DictionariesSettingsFragment : Fragment() {
     private fun exportFiles() {
         lifecycleScope.launch {
             try {
-                // Получаем данные до создания ZIP, чтобы избежать проблем с контекстом
                 val entities = dao.getAllEntities().first()
                 val inputTypes = dao.getAllInputTypes().first()
                 val templates = dao.getAllTemplates().first()
