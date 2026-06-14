@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.meatorder.R
 import com.example.meatorder.data.entity.Template
 import com.example.meatorder.databinding.FragmentOrder1Binding
+import com.example.meatorder.utils.applyFontSize
 import com.example.meatorder.utils.getDao
 import com.example.meatorder.utils.getPrefs
 import kotlinx.coroutines.CoroutineScope
@@ -59,7 +60,6 @@ class Order1Fragment : Fragment() {
             }
         }
 
-        // Кнопка "ШАБЛОНЫ" теперь ведёт сразу на редактор шаблонов
         binding.btnTemplates.setOnClickListener {
             val bundle = Bundle().apply {
                 putString("dict", "templates")
@@ -75,7 +75,7 @@ class Order1Fragment : Fragment() {
         }
         val names = templates.map { it.temp }.toTypedArray()
         val checked = BooleanArray(templates.size) { false }
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Выберите шаблоны")
             .setMultiChoiceItems(names, checked) { _, index, isChecked ->
                 checked[index] = isChecked
@@ -90,7 +90,25 @@ class Order1Fragment : Fragment() {
                 findNavController().navigate(R.id.action_order1Fragment_to_order2Fragment, bundle)
             }
             .setNegativeButton("Отмена", null)
-            .show()
+            .create()   // создаём диалог, но пока не показываем
+
+        // Устанавливаем слушатель, чтобы применить шрифт после отображения
+        dialog.setOnShowListener { dialogInterface ->
+            (dialogInterface as? AlertDialog)?.let {
+                it.window?.decorView?.let { rootView ->
+                    applyFontSize(rootView, getPrefs().fontSize)
+                    // Повторно применяем к кнопкам, т.к. они могут не попасть под обход
+                    it.getButton(AlertDialog.BUTTON_POSITIVE)?.let { btn ->
+                        applyFontSize(btn, getPrefs().fontSize)
+                    }
+                    it.getButton(AlertDialog.BUTTON_NEGATIVE)?.let { btn ->
+                        applyFontSize(btn, getPrefs().fontSize)
+                    }
+                }
+            }
+        }
+
+        dialog.show()
     }
 
     override fun onDestroyView() {
