@@ -54,7 +54,7 @@ class Order4Fragment : Fragment() {
 
             // Группировка и сортировка
             val grouped = items.groupBy { it["group"] as String }
-            val sortedGroups = grouped.keys.sorted() // группы по алфавиту
+            val sortedGroups = grouped.keys.sorted()
             val sb = StringBuilder()
 
             for (group in sortedGroups) {
@@ -73,6 +73,7 @@ class Order4Fragment : Fragment() {
                         .replace("{input_type}", inputTypeName)
                         .replace("{input_type_short}", shortName)
                         .replace("{summary}", "")
+                        .trimEnd()   // убираем возможные завершающие пробелы и переносы
                     sb.appendLine(line)
                 }
                 sb.appendLine() // пустая строка между группами
