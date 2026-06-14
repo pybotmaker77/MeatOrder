@@ -45,9 +45,9 @@ class MainFragment : Fragment() {
                     val bundle = Bundle().apply {
                         putBoolean("byBalance", false)
                         putIntArray("templateIds", intArrayOf())
-                        putString("selectedItemsJson", draftJson)
+                        putString("initialItemsJson", draftJson) // передаём как предзаполнение
                     }
-                    findNavController().navigate(R.id.action_mainFragment_to_order3Fragment, bundle)
+                    findNavController().navigate(R.id.action_mainFragment_to_order2Fragment, bundle)
                 }
                 .setNegativeButton("Нет") { _, _ ->
                     prefs.clearDraft()
